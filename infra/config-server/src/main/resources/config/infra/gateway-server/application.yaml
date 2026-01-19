@@ -1,5 +1,5 @@
 server:
-  port: 8585
+  port: 8080
 
 spring:
   cloud:
@@ -18,4 +18,4 @@ spring:
         - id: neutral_route
           uri: lb://main-service
           predicates:
-            - Path=/events/**,/users/**,/compilations/**
+            - Path=/events/**,/users/**,/compilations/**,/categories/**
