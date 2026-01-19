@@ -1,0 +1,21 @@
+server:
+  port: 8585
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: admin_route
+          uri: lb://main-service
+          predicates:
+            - Path=/admin/**
+
+        - id: public_route
+          uri: lb://main-service
+          predicates:
+            - Path=/public/**
+
+        - id: neutral_route
+          uri: lb://main-service
+          predicates:
+            - Path=/events/**,/users/**,/compilations/**
