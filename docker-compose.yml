@@ -18,3 +18,53 @@ services:
       - POSTGRES_DB=main
       - POSTGRES_USER=main
       - POSTGRES_PASSWORD=main
+
+  event-db:
+    image: postgres:16.1
+    container_name: event-db
+    ports:
+      - "5555:5432"
+    environment:
+      - POSTGRES_DB=event
+      - POSTGRES_USER=event
+      - POSTGRES_PASSWORD=event
+
+  category-db:
+    image: postgres:16.1
+    container_name: category-db
+    ports:
+      - "6666:5432"
+    environment:
+      - POSTGRES_DB=category
+      - POSTGRES_USER=category
+      - POSTGRES_PASSWORD=category
+
+  request-db:
+    image: postgres:16.1
+    container_name: request-db
+    ports:
+      - "7777:5432"
+    environment:
+      - POSTGRES_DB=request
+      - POSTGRES_USER=request
+      - POSTGRES_PASSWORD=request
+
+  user-db:
+    image: postgres:16.1
+    container_name: user-db
+    ports:
+      - "8888:5432"
+    environment:
+      - POSTGRES_DB=user
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=user
+
+  compilation-db:
+    image: postgres:16.1
+    container_name: compilation-db
+    ports:
+      - "9999:5432"
+    environment:
+      - POSTGRES_DB=compilation
+      - POSTGRES_USER=compilation
+      - POSTGRES_PASSWORD=compilation
