@@ -6,9 +6,9 @@ statsServer:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:9999/compilation
-    username: compilation
-    password: compilation
+    url: jdbc:postgresql://localhost:6666/category
+    username: category
+    password: category
   jpa:
     properties:
       hibernate:
