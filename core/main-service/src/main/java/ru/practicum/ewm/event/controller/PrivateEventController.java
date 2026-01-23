@@ -1,5 +1,7 @@
 package ru.practicum.ewm.event.controller;
 
+import core.common.event.dto.*;
+import core.common.requests.dto.ParticipationRequestDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -9,9 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.ewm.event.dto.*;
 import ru.practicum.ewm.event.service.EventService;
-import ru.practicum.ewm.request.dto.ParticipationRequestDto;
 
 import java.net.URI;
 import java.util.List;

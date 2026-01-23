@@ -1,5 +1,7 @@
 package ru.practicum.ewm.category.controller;
 
+import core.common.category.dto.CategoryDto;
+import core.common.category.dto.CategoryRequestDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,8 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.ewm.category.dto.CategoryDto;
-import ru.practicum.ewm.category.dto.CategoryRequestDto;
 import ru.practicum.ewm.category.service.CategoryService;
 
 @Slf4j

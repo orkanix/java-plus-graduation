@@ -1,9 +1,9 @@
 package ru.practicum.ewm.request.mapper;
 
+import core.common.requests.dto.ParticipationRequestDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import ru.practicum.ewm.event.mapper.EventMapper;
-import ru.practicum.ewm.request.dto.ParticipationRequestDto;
 import ru.practicum.ewm.request.model.Request;
 import ru.practicum.ewm.user.mapper.UserMapper;
 

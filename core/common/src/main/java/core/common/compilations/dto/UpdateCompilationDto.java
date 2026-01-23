@@ -1,4 +1,4 @@
-package ru.practicum.ewm.compilation.dto;
+package core.common.compilations.dto;
 
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;

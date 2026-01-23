@@ -1,13 +1,13 @@
-package ru.practicum.ewm.event.dto;
+package core.common.event.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.ewm.category.dto.CategoryDto;
-import ru.practicum.ewm.event.model.EventState;
-import ru.practicum.ewm.user.dto.UserShortDto;
 
 import java.time.LocalDateTime;
 
@@ -15,40 +15,33 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class EventFullDto {
+public class UpdEventAdminRequest {
 
-    private Long id;
-
+    @Size(min = 20, max = 2000)
     private String annotation;
 
-    private CategoryDto category;
+    private Long category;
 
-    private Long confirmedRequests;
-
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime createdOn;
-
+    @Size(min = 20, max = 7000)
     private String description;
 
+    @Future
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
-
-    private UserShortDto initiator;
 
     private Location location;
 
     private Boolean paid;
 
+    @Positive
     private Integer participantLimit;
-
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime publishedOn;
 
     private Boolean requestModeration;
 
-    private EventState state;
+    private StateAction stateAction;
 
+    @Size(min = 3, max = 120)
     private String title;
 
-    private Long views;
+    public enum StateAction { PUBLISH_EVENT, REJECT_EVENT }
 }

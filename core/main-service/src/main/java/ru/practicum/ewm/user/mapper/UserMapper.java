@@ -1,10 +1,10 @@
 package ru.practicum.ewm.user.mapper;
 
+import core.common.user.dto.NewUserRequest;
+import core.common.user.dto.UserDto;
+import core.common.user.dto.UserShortDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import ru.practicum.ewm.user.dto.NewUserRequest;
-import ru.practicum.ewm.user.dto.UserDto;
-import ru.practicum.ewm.user.dto.UserShortDto;
 import ru.practicum.ewm.user.model.User;
 
 @Mapper(componentModel = "spring")

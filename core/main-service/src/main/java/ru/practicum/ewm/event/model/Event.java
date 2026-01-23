@@ -1,9 +1,10 @@
 package ru.practicum.ewm.event.model;
 
+import core.common.event.dto.EventState;
+import core.common.event.dto.Location;
 import jakarta.persistence.*;
 import lombok.*;
 import ru.practicum.ewm.category.model.Category;
-import ru.practicum.ewm.event.dto.Location;
 import ru.practicum.ewm.user.model.User;
 
 import java.time.Instant;

@@ -1,9 +1,9 @@
 package ru.practicum.ewm.compilation.service;
 
+import core.common.compilations.dto.CompilationDto;
+import core.common.compilations.dto.NewCompilationDto;
+import core.common.compilations.dto.UpdateCompilationDto;
 import org.springframework.stereotype.Service;
-import ru.practicum.ewm.compilation.dto.CompilationDto;
-import ru.practicum.ewm.compilation.dto.NewCompilationDto;
-import ru.practicum.ewm.compilation.dto.UpdateCompilationDto;
 
 import java.util.List;
 

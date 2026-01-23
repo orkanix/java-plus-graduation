@@ -1,5 +1,6 @@
 package ru.practicum.ewm.request.model;
 
+import core.common.requests.dto.RequestStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import ru.practicum.ewm.event.model.Event;
