@@ -1,4 +1,4 @@
-package ru.practicum.ewm.exception.dto;
+package core.common.exception.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 

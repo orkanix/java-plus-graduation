@@ -12,8 +12,8 @@ import ru.practicum.ewm.comment.model.Comment;
 import ru.practicum.ewm.comment.model.CommentState;
 import ru.practicum.ewm.comment.repository.CommentRepository;
 import ru.practicum.ewm.event.repository.EventRepository;
-import ru.practicum.ewm.exception.ConflictException;
-import ru.practicum.ewm.exception.NotFoundException;
+import core.common.exception.ConflictException;
+import core.common.exception.NotFoundException;
 import ru.practicum.ewm.user.repository.UserRepository;
 
 import java.util.List;

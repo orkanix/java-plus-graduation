@@ -1,4 +1,4 @@
-package ru.practicum.ewm.exception;
+package core.common.exception;
 
 public abstract class ApiError extends RuntimeException {
 

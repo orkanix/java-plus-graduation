@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.comment.dto.CommentFullDto;
@@ -24,22 +23,19 @@ public class PrivateCommentController {
     private final CommentService commentService;
 
     @PostMapping
-    public ResponseEntity<CommentFullDto> addComment(@RequestBody @Valid NewCommentDto dto,
+    @ResponseStatus(HttpStatus.CREATED)
+    public CommentFullDto addComment(@RequestBody @Valid NewCommentDto dto,
                                                      @PathVariable Long eventId,
                                                      @PathVariable Long userId) {
         log.info("Метод addComment(); even");
-
-        CommentFullDto result = commentService.add(dto, eventId, userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(result);
+        return commentService.add(dto, eventId, userId);
     }
 
     @GetMapping
-    public ResponseEntity<List<CommentFullDto>> getAllCommentsBy(@PathVariable Long userId,
+    public List<CommentFullDto> getAllCommentsBy(@PathVariable Long userId,
                                                                  @PathVariable Long eventId) {
         log.info("Метод getCommentsByUserId(); userId={} eventId={}", userId, eventId);
-
-        List<CommentFullDto> result = commentService.getAllBy(userId, eventId);
-        return ResponseEntity.ok(result);
+        return commentService.getAllBy(userId, eventId);
     }
 
     @DeleteMapping("/{commentId}")
@@ -48,18 +44,15 @@ public class PrivateCommentController {
                               @PathVariable Long eventId,
                               @PathVariable Long commentId) {
         log.info("Метод deleteComment(); userId={}, eventId={}, commentId={}", userId, eventId, commentId);
-
         commentService.delete(userId, commentId);
     }
 
     @PatchMapping("/{commentId}")
-    public ResponseEntity<CommentFullDto> updateComment(@PathVariable Long userId,
+    public CommentFullDto updateComment(@PathVariable Long userId,
                                                         @PathVariable Long eventId,
                                                         @PathVariable Long commentId,
                                                         @Valid @RequestBody UpdCommentDto updDto) {
         log.info("Метод updateComment(); updCommentDto={}", updDto);
-
-        CommentFullDto result = commentService.update(userId, commentId, updDto);
-        return ResponseEntity.ok(result);
+        return commentService.update(userId, commentId, updDto);
     }
 }

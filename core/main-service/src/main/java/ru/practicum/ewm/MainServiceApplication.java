@@ -2,10 +2,15 @@ package ru.practicum.ewm;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {
+        "ru.practicum.ewm",
+        "core.common"
+})
+@EnableFeignClients
 public class MainServiceApplication {
 
     @Bean

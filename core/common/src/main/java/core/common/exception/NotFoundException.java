@@ -1,4 +1,4 @@
-package ru.practicum.ewm.exception;
+package core.common.exception;
 
 public class NotFoundException extends ApiError {
 

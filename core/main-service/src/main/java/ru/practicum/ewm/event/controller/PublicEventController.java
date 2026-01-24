@@ -7,7 +7,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.event.service.EventService;
 
@@ -22,20 +21,16 @@ public class PublicEventController {
     private final EventService eventService;
 
     @GetMapping("/{eventId}")
-    public ResponseEntity<EventFullDto> publicSearchOne(@PathVariable @Positive Long eventId,
+    public EventFullDto publicSearchOne(@PathVariable @Positive Long eventId,
                                                         HttpServletRequest request) {
         log.debug("Метод publicSearchOne(); eventId={}", eventId);
-
-        EventFullDto event = eventService.getPublicBy(eventId, request);
-        return ResponseEntity.ok(event);
+        return eventService.getPublicBy(eventId, request);
     }
 
     @GetMapping
-    public ResponseEntity<List<EventFullDto>> publicSearchMany(@Valid @ModelAttribute UserEventSearchParams params,
+    public List<EventFullDto> publicSearchMany(@Valid @ModelAttribute UserEventSearchParams params,
                                                                HttpServletRequest request) {
         log.debug("Метод publicSearchMany(); {}", params);
-
-        List<EventFullDto> events = eventService.getPublicBy(params, request);
-        return ResponseEntity.ok(events);
+        return eventService.getPublicBy(params, request);
     }
 }
