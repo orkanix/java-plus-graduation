@@ -5,6 +5,7 @@ import core.common.requests.dto.ParticipationRequestDto;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
+import java.util.Set;
 
 public interface EventService {
 
@@ -30,4 +31,8 @@ public interface EventService {
     List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId);
 
     UpdRequestsStatusResult updateRequests(Long userId, Long eventId, EventRequestStatusUpdateRequest updDto);
+
+    boolean existsByCategoryId(Long categoryId);
+
+    List<EventShortDto> findAllById(Set<Long> eventId);
 }

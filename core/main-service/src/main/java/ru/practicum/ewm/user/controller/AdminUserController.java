@@ -1,7 +1,9 @@
 package ru.practicum.ewm.user.controller;
 
+import core.common.category.dto.CategoryDto;
 import core.common.user.dto.NewUserRequest;
 import core.common.user.dto.UserDto;
+import core.common.user.dto.UserShortDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -44,5 +46,15 @@ public class AdminUserController {
     public void delete(@PathVariable @Positive Long userId) {
         log.debug("Метод delete(); userId={}", userId);
         userService.delete(userId);
+    }
+
+    @GetMapping("/{userId}")
+    public UserShortDto findUserById(@PathVariable Long userId) {
+        return userService.findUserById(userId);
+    }
+
+    @PostMapping("/getIds")
+    public List<UserShortDto> getUsersByIds(@RequestBody List<Long> usersIds) {
+        return userService.getUsersByIds(usersIds);
     }
 }

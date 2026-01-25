@@ -6,6 +6,7 @@ import core.common.exception.ConflictException;
 import core.common.exception.NotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -18,34 +19,34 @@ import java.time.LocalDateTime;
 public class ErrorHandler {
 
     @ExceptionHandler(NotFoundException.class)
-    @ResponseStatus(org.springframework.http.HttpStatus.NOT_FOUND)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(NotFoundException ex, HttpServletRequest request) {
         log.warn("NOT_FOUND: {}", ex.getMessage());
-        return buildErrorResponse(ex, request, org.springframework.http.HttpStatus.NOT_FOUND);
+        return buildErrorResponse(ex, request, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(BadRequestException.class)
-    @ResponseStatus(org.springframework.http.HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleBadRequestException(BadRequestException ex, HttpServletRequest request) {
         log.warn("BAD_REQUEST: {}", ex.getMessage());
-        return buildErrorResponse(ex, request, org.springframework.http.HttpStatus.BAD_REQUEST);
+        return buildErrorResponse(ex, request, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ConflictException.class)
-    @ResponseStatus(org.springframework.http.HttpStatus.CONFLICT)
+    @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleConflictException(ConflictException ex, HttpServletRequest request) {
         log.warn("CONFLICT: {}", ex.getMessage());
-        return buildErrorResponse(ex, request, org.springframework.http.HttpStatus.CONFLICT);
+        return buildErrorResponse(ex, request, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(ApiError.class)
-    @ResponseStatus(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleOtherApiErrors(ApiError ex, HttpServletRequest request) {
         log.warn("INTERNAL_SERVER_ERROR: {}", ex.getMessage());
-        return buildErrorResponse(ex, request, org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
+        return buildErrorResponse(ex, request, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    private ErrorResponse buildErrorResponse(ApiError ex, HttpServletRequest request, org.springframework.http.HttpStatus status) {
+    private ErrorResponse buildErrorResponse(ApiError ex, HttpServletRequest request, HttpStatus status) {
         return new ErrorResponse(
                 LocalDateTime.now(),
                 status.value(),

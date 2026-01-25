@@ -39,11 +39,11 @@ public class RequestServiceImpl implements RequestService {
         User user = this.findUserBy(userId);
         Event event = this.findEventBy(eventId);
 
-        if (eventRepository.existsByIdAndInitiatorId(eventId, userId)) {
+        if (eventRepository.existsByIdAndInitiator(eventId, userId)) {
             throw new ConflictException("Нельзя участвовать в собственном событии");
         }
 
-        if (requestRepository.existsByEventIdAndRequesterId(eventId, userId)) {
+        if (requestRepository.existsByEventAndRequester(eventId, userId)) {
             throw new ConflictException("Request уже создан ранее");
         }
 
@@ -67,8 +67,8 @@ public class RequestServiceImpl implements RequestService {
         }
 
         Request request = Request.builder()
-                .requester(user)
-                .event(event)
+                .requester(user.getId())
+                .event(event.getId())
                 .status(status)
                 .build();
         request = requestRepository.save(request);
@@ -80,7 +80,7 @@ public class RequestServiceImpl implements RequestService {
     public List<ParticipationRequestDto> getAllBy(Long userId) {
         log.debug("Метод getAllBy(); userId={}", userId);
 
-        List<Request> result = requestRepository.findAllByRequesterId(userId);
+        List<Request> result = requestRepository.findAllByRequester(userId);
 
         return result.stream()
                 .map(requestMapper::toDto)
@@ -96,7 +96,7 @@ public class RequestServiceImpl implements RequestService {
         Request request = this.findRequestBy(requestId);
         request.setStatus(RequestStatus.CANCELED);
 
-        if (!request.getRequester().getId().equals(userId)) {
+        if (!request.getRequester().equals(userId)) {
             throw new ConflictException("User id={} не является автором этого запроса", userId);
         }
         request = requestRepository.save(request);

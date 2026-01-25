@@ -31,4 +31,9 @@ public class PublicCategoryController {
     public CategoryDto getCategory(@PathVariable Long catId) {
         return categoryService.getById(catId);
     }
+
+    @PostMapping("/getIds")
+    public List<CategoryDto> getCategoriesByIds(@RequestBody List<Long> categoryIds) {
+        return categoryService.getCategoriesByIds(categoryIds);
+    }
 }

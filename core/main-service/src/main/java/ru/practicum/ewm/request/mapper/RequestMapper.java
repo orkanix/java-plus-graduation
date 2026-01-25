@@ -1,26 +1,38 @@
 package ru.practicum.ewm.request.mapper;
 
 import core.common.requests.dto.ParticipationRequestDto;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import ru.practicum.ewm.event.mapper.EventMapper;
+import org.springframework.stereotype.Component;
 import ru.practicum.ewm.request.model.Request;
-import ru.practicum.ewm.user.mapper.UserMapper;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
-@Mapper(componentModel = "spring",
-        uses = {UserMapper.class, EventMapper.class})
-public interface RequestMapper {
+@Component
+public class RequestMapper {
 
-    @Mapping(target = "event", expression = "java(request.getEvent().getId())")
-    @Mapping(target = "requester", expression = "java(request.getRequester().getId())")
-    @Mapping(target = "created", expression = "java(toLocalDateTime(request.getCreated()))")
-    ParticipationRequestDto toDto(Request request);
+    public ParticipationRequestDto toDto(Request request) {
+        if (request == null) return null;
 
-    default LocalDateTime toLocalDateTime(Instant instant) {
+        ParticipationRequestDto dto = new ParticipationRequestDto();
+
+        dto.setId(request.getId());
+
+        if (request.getEvent() != null) {
+            dto.setEvent(request.getEvent());
+        }
+
+        if (request.getRequester() != null) {
+            dto.setRequester(request.getRequester());
+        }
+
+        dto.setStatus(request.getStatus());
+        dto.setCreated(toLocalDateTime(request.getCreated()));
+
+        return dto;
+    }
+
+    private LocalDateTime toLocalDateTime(Instant instant) {
         return instant != null ? LocalDateTime.ofInstant(instant, ZoneOffset.UTC) : null;
     }
 }

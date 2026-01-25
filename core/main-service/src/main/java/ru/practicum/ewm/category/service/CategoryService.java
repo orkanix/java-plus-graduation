@@ -18,4 +18,6 @@ public interface CategoryService {
     CategoryDto getById(Long categoryId);
 
     List<CategoryDto> getAll(int from, int size);
+
+    List<CategoryDto> getCategoriesByIds(List<Long> categoryIds);
 }

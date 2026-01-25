@@ -70,7 +70,7 @@ public class CommentServiceImpl implements CommentService {
     public CommentFullDto add(NewCommentDto dto, Long eventId, Long userId) {
         log.info("Метод add(); eventId={}, userId={}; dto={}", eventId, userId, dto);
 
-        if (!eventRepository.existsByIdAndInitiatorId(eventId, userId)) {
+        if (!eventRepository.existsByIdAndInitiator(eventId, userId)) {
             throw new ConflictException("Инициатор не может комментировать свои события; eventId={}, userId={}",
                     eventId, userId);
         }

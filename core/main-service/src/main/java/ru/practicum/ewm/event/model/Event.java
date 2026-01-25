@@ -27,13 +27,8 @@ public class Event {
             nullable = false)
     private String annotation;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id",
-            nullable = false,
-            foreignKey = @ForeignKey(name = "fk_events_categories",
-                    value = ConstraintMode.CONSTRAINT))
-    @ToString.Exclude
-    private Category category;
+    @Column(name = "category_id", nullable = false)
+    private Long category;
 
     @Column(name = "confirmed_requests",
             nullable = false,
@@ -54,12 +49,8 @@ public class Event {
             nullable = false)
     private Instant eventDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id",
-            nullable = false,
-            foreignKey = @ForeignKey(name = "fk_events_users"))
-    @ToString.Exclude
-    private User initiator;
+    @Column(name = "user_id", nullable = false)
+    private Long initiator;
 
     @Embedded
     private Location location;

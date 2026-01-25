@@ -1,6 +1,7 @@
 package ru.practicum.ewm.event.controller;
 
 import core.common.event.dto.EventFullDto;
+import core.common.event.dto.EventShortDto;
 import core.common.event.dto.UserEventSearchParams;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.event.service.EventService;
 
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @RestController
@@ -32,5 +34,15 @@ public class PublicEventController {
                                                                HttpServletRequest request) {
         log.debug("Метод publicSearchMany(); {}", params);
         return eventService.getPublicBy(params, request);
+    }
+
+    @GetMapping("/{categoryId}/exist")
+    public boolean existsByCategoryId(@PathVariable Long categoryId) {
+        return eventService.existsByCategoryId(categoryId);
+    }
+
+    @GetMapping("/findAllById")
+    public List<EventShortDto> findAllById(@RequestParam Set<Long> eventId) {
+        return eventService.findAllById(eventId);
     }
 }

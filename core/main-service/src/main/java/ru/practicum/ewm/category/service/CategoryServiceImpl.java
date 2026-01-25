@@ -2,6 +2,7 @@ package ru.practicum.ewm.category.service;
 
 import core.common.category.dto.CategoryDto;
 import core.common.category.dto.CategoryRequestDto;
+import core.common.event.client.EventClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -11,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.category.mapper.CategoryMapper;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.repository.CategoryRepository;
-import ru.practicum.ewm.event.repository.EventRepository;
 import core.common.exception.ConflictException;
 import core.common.exception.NotFoundException;
 
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class CategoryServiceImpl implements CategoryService {
 
-    private final EventRepository eventRepository;
+    private final EventClient eventClient;
     private final CategoryRepository categoryRepository;
 
     private final CategoryMapper categoryMapper;
@@ -65,8 +65,9 @@ public class CategoryServiceImpl implements CategoryService {
 
         this.validateCategoryExists(categoryId);
 
-        if (eventRepository.existsByCategoryId(categoryId)) {
-            throw new ConflictException("Category с id={} используется", categoryId);
+        boolean hasEvents = eventClient.existsByCategoryId(categoryId);
+        if (hasEvents) {
+            throw new ConflictException("Category с id=" + categoryId + " используется");
         }
 
         categoryRepository.deleteById(categoryId);
@@ -96,6 +97,12 @@ public class CategoryServiceImpl implements CategoryService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<CategoryDto> getCategoriesByIds(List<Long> categoryIds) {
+        return categoryRepository.findAllById(categoryIds).stream()
+                .map(categoryMapper::toDto)
+                .toList();
+    }
 
     private void validateCategoryNameExists(String name) {
         if (categoryRepository.existsByNameIgnoreCase(name)) {

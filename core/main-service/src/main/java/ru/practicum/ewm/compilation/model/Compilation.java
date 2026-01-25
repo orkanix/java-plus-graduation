@@ -21,14 +21,12 @@ public class Compilation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToMany
-    @JoinTable(name = "compilation_events",
-            joinColumns = @JoinColumn(name = "compilation_id",
-                    foreignKey = @ForeignKey(name = "fk_compilation_events__compilations")),
-            inverseJoinColumns = @JoinColumn(name = "event_id",
-                    foreignKey = @ForeignKey(name = "fk_compilation_events__events")))
+    @ElementCollection
+    @CollectionTable(name = "compilation_events",
+            joinColumns = @JoinColumn(name = "compilation_id"), foreignKey = @ForeignKey(name = "fk_compilation_events__compilations"))
+    @Column(name = "event_id")
     @Builder.Default
-    private List<Event> events = new ArrayList<>();
+    private List<Long> events = new ArrayList<>();
 
     @Column(nullable = false)
     private Boolean pinned;

@@ -10,7 +10,7 @@ import org.springframework.web.client.RestTemplate;
         "ru.practicum.ewm",
         "core.common"
 })
-@EnableFeignClients
+@EnableFeignClients(basePackages = "core.common")
 public class MainServiceApplication {
 
     @Bean

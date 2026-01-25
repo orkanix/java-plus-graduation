@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "main-service")
+@FeignClient(name = "main-service", contextId = "category-service")
 public interface CategoryClient {
 
     String ADMIN_PREFIX = "/admin/categories";
@@ -29,4 +29,7 @@ public interface CategoryClient {
 
     @GetMapping(PUBLIC_PREFIX + "/{catId}")
     CategoryDto getCategory(@PathVariable Long catId);
+
+    @PostMapping(PUBLIC_PREFIX + "/getIds")
+    List<CategoryDto> getCategoriesByIds(@RequestBody List<Long> categoryIds);
 }

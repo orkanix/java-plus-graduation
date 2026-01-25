@@ -2,12 +2,13 @@ package core.common.user.client;
 
 import core.common.user.dto.NewUserRequest;
 import core.common.user.dto.UserDto;
+import core.common.user.dto.UserShortDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "main-service")
+@FeignClient(name = "main-service", contextId = "user-service")
 public interface UserClient {
 
     String ADMIN_PREFIX = "/admin/users";
@@ -22,4 +23,10 @@ public interface UserClient {
 
     @DeleteMapping(ADMIN_PREFIX + "/{userId}")
     void delete(@PathVariable Long userId);
+
+    @GetMapping(ADMIN_PREFIX + "/{userId}")
+    UserShortDto findUserById(@PathVariable Long userId);
+
+    @PostMapping(ADMIN_PREFIX + "/getIds")
+    List<UserShortDto> getUsersByIds(@RequestBody List<Long> usersIds);
 }

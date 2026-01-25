@@ -1,7 +1,9 @@
 package ru.practicum.ewm.user.service;
 
+import core.common.category.dto.CategoryDto;
 import core.common.user.dto.NewUserRequest;
 import core.common.user.dto.UserDto;
+import core.common.user.dto.UserShortDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -75,5 +77,20 @@ public class UserServiceImpl implements UserService {
         } else {
             throw new NotFoundException("User userId={} не найден", userId);
         }
+    }
+
+    @Override
+    public UserShortDto findUserById(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id::" + userId + " не найден!"));
+
+        return userMapper.toShortDto(user);
+    }
+
+    @Override
+    public List<UserShortDto> getUsersByIds(List<Long> usersIds) {
+        return userRepository.findAllById(usersIds).stream()
+                .map(userMapper::toShortDto)
+                .toList();
     }
 }

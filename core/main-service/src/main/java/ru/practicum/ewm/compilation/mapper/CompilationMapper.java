@@ -5,25 +5,62 @@ import core.common.compilations.dto.NewCompilationDto;
 import core.common.compilations.dto.UpdateCompilationDto;
 import core.common.event.dto.EventShortDto;
 import org.mapstruct.*;
+import org.springframework.stereotype.Component;
 import ru.practicum.ewm.compilation.model.Compilation;
-import ru.practicum.ewm.event.mapper.EventMapper;
-import ru.practicum.ewm.event.model.Event;
 
+import java.util.ArrayList;
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = {EventMapper.class})
-public interface CompilationMapper {
+@Component
+public class CompilationMapper {
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "events", ignore = true)
-    Compilation toEntity(NewCompilationDto newDto);
+    public Compilation toEntity(NewCompilationDto newDto) {
+        if (newDto == null) return null;
 
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "events", ignore = true)
-    Compilation updateFromDto(UpdateCompilationDto updDto, @MappingTarget Compilation compilation);
+        Compilation compilation = new Compilation();
+        compilation.setTitle(newDto.getTitle());
+        compilation.setPinned(newDto.getPinned());
+        compilation.setEvents(new ArrayList<>());
 
-    CompilationDto toDto(Compilation compilation);
+        return compilation;
+    }
 
-    List<EventShortDto> mapEvents(List<Event> events);
+    public Compilation updateFromDto(UpdateCompilationDto updDto, Compilation compilation) {
+        if (updDto == null || compilation == null) return null;
+
+        if (updDto.getTitle() != null) {
+            compilation.setTitle(updDto.getTitle());
+        }
+
+        if (updDto.getPinned() != null) {
+            compilation.setPinned(updDto.getPinned());
+        }
+
+        if (updDto.getEvents() != null) {
+            compilation.setEvents(new ArrayList<>(updDto.getEvents()));
+        }
+
+        return compilation;
+    }
+
+    public CompilationDto toDto(Compilation compilation) {
+        if (compilation == null) return null;
+
+        CompilationDto dto = new CompilationDto();
+        dto.setId(compilation.getId());
+        dto.setTitle(compilation.getTitle());
+        dto.setPinned(compilation.getPinned());
+
+        List<EventShortDto> events = new ArrayList<>();
+        if (compilation.getEvents() != null) {
+            for (Long id : compilation.getEvents()) {
+                EventShortDto e = new EventShortDto();
+                e.setId(id);
+                events.add(e);
+            }
+        }
+        dto.setEvents(events);
+
+        return dto;
+    }
 }

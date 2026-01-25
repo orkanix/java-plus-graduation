@@ -15,15 +15,15 @@ import java.util.Optional;
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPredicateExecutor<Event> {
 
-    Page<Event> findAllByInitiatorId(Long userId, Pageable pageable);
+    Page<Event> findAllByInitiator(Long userId, Pageable pageable);
 
-    Optional<Event> findByIdAndInitiatorId(Long eventId, Long userId);
+    Optional<Event> findByIdAndInitiator(Long eventId, Long userId);
 
     Optional<Event> findByIdAndState(Long eventId, EventState state);
 
     List<Event> findEventsByIdIn(Collection<Long> ids);
 
-    boolean existsByCategoryId(Long categoryId);
+    boolean existsByCategory(Long categoryId);
 
-    boolean existsByIdAndInitiatorId(Long eventId, Long userId);
+    boolean existsByIdAndInitiator(Long eventId, Long userId);
 }

@@ -1,82 +1,138 @@
 package ru.practicum.ewm.event.mapper;
 
+import core.common.category.dto.CategoryDto;
 import core.common.event.dto.*;
+import core.common.user.dto.UserShortDto;
 import org.mapstruct.*;
-import ru.practicum.ewm.category.mapper.CategoryMapper;
+import org.springframework.stereotype.Component;
 import ru.practicum.ewm.event.model.Event;
-import ru.practicum.ewm.user.mapper.UserMapper;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
-@Mapper(componentModel = "spring", uses = {CategoryMapper.class, UserMapper.class})
-public interface EventMapper {
+@Component
+public class EventMapper {
 
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "category", ignore = true)
-    @Mapping(target = "confirmedRequests", ignore = true)
-    @Mapping(target = "createdOn", ignore = true)
-    @Mapping(target = "location", ignore = true)
-    @Mapping(target = "eventDate", expression = "java(toInstantForMap(newEventDto.getEventDate()))")
-    @Mapping(target = "initiator", ignore = true)
-    @Mapping(target = "publishedOn", ignore = true)
-    @Mapping(target = "paid", expression = "java(newEventDto.getPaid() != null ? newEventDto.getPaid() : false)")
-    @Mapping(target = "participantLimit",
-            expression = "java(newEventDto.getParticipantLimit() != null ? newEventDto.getParticipantLimit() : 0)")
-    @Mapping(target = "requestModeration",
-            expression = "java(newEventDto.getRequestModeration() != null ? newEventDto.getRequestModeration() : true)")
+    public Event toEntity(NewEventDto newEventDto, Long userId) {
+        if (newEventDto == null) return null;
 
-    @Mapping(target = "state", ignore = true)
-    @Mapping(target = "views", ignore = true)
-    Event toEntity(NewEventDto newEventDto);
+        Event event = new Event();
 
-    @Mapping(target = "eventDate", expression = "java(toLocalDateTimeForMap(event.getEventDate()))")
-    EventShortDto toShortDto(Event event);
+        event.setTitle(newEventDto.getTitle());
+        event.setAnnotation(newEventDto.getAnnotation());
+        event.setDescription(newEventDto.getDescription());
+        event.setEventDate(toInstantForMap(newEventDto.getEventDate()));
+        event.setPaid(newEventDto.getPaid() != null ? newEventDto.getPaid() : false);
+        event.setParticipantLimit(newEventDto.getParticipantLimit() != null ? newEventDto.getParticipantLimit() : 0);
+        event.setRequestModeration(newEventDto.getRequestModeration() != null ? newEventDto.getRequestModeration() : true);
 
-    @Mapping(target = "createdOn", expression = "java(toLocalDateTimeForMap(event.getCreatedOn()))")
-    @Mapping(target = "eventDate", expression = "java(toLocalDateTimeForMap(event.getEventDate()))")
-    @Mapping(target = "publishedOn", expression = "java(toLocalDateTimeForMap(event.getPublishedOn()))")
-    EventFullDto toFullDto(Event event);
+        event.setCategory(newEventDto.getCategory());
+        event.setInitiator(userId);
 
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "initiator", ignore = true)
-    @Mapping(target = "category", ignore = true)
-    @Mapping(target = "location", ignore = true)
-    @Mapping(target = "eventDate",
-            expression = "java(toInstantForUpdate(updEventUserRequest.getEventDate(), event.getEventDate()))")
-    @Mapping(target = "publishedOn", ignore = true)
-    @Mapping(target = "createdOn", ignore = true)
-    @Mapping(target = "state", ignore = true)
-    @Mapping(target = "views", ignore = true)
-    @Mapping(target = "confirmedRequests", ignore = true)
-    void updateFromDto(UpdEventUserRequest updEventUserRequest, @MappingTarget Event event);
+        return event;
+    }
 
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "initiator", ignore = true)
-    @Mapping(target = "category", ignore = true)
-    @Mapping(target = "location", ignore = true)
-    @Mapping(target = "eventDate",
-            expression = "java(toInstantForUpdate(updEventAdminRequest.getEventDate(), event.getEventDate()))")
-    @Mapping(target = "publishedOn", ignore = true)
-    @Mapping(target = "createdOn", ignore = true)
-    @Mapping(target = "state", ignore = true)
-    @Mapping(target = "views", ignore = true)
-    @Mapping(target = "confirmedRequests", ignore = true)
-    void updateFromDto(UpdEventAdminRequest updEventAdminRequest, @MappingTarget Event event);
+    public EventShortDto toShortDto(Event event, CategoryDto categoryDto, UserShortDto userShortDto) {
+        if (event == null) return null;
 
-    default Instant toInstantForMap(LocalDateTime dateTime) {
+        EventShortDto dto = new EventShortDto();
+        dto.setId(event.getId());
+        dto.setTitle(event.getTitle());
+        dto.setAnnotation(event.getAnnotation());
+        dto.setCategory(categoryDto);
+        dto.setEventDate(toLocalDateTimeForMap(event.getEventDate()));
+        dto.setPaid(event.getPaid());
+        dto.setConfirmedRequests(event.getConfirmedRequests());
+        dto.setViews(event.getViews());
+        dto.setInitiator(userShortDto);
+
+        return dto;
+    }
+
+    public EventFullDto toFullDto(Event event, CategoryDto categoryDto, UserShortDto userShortDto) {
+        if (event == null) return null;
+
+        EventFullDto dto = new EventFullDto();
+        dto.setId(event.getId());
+        dto.setTitle(event.getTitle());
+        dto.setDescription(event.getDescription());
+        dto.setAnnotation(event.getAnnotation());
+        dto.setCategory(categoryDto);
+        dto.setEventDate(toLocalDateTimeForMap(event.getEventDate()));
+        dto.setCreatedOn(toLocalDateTimeForMap(event.getCreatedOn()));
+        dto.setPublishedOn(toLocalDateTimeForMap(event.getPublishedOn()));
+        dto.setPaid(event.getPaid());
+        dto.setParticipantLimit(event.getParticipantLimit());
+        dto.setRequestModeration(event.getRequestModeration());
+        dto.setConfirmedRequests(event.getConfirmedRequests());
+        dto.setState(event.getState());
+        dto.setViews(event.getViews());
+        dto.setInitiator(userShortDto);
+        dto.setLocation(event.getLocation());
+
+        return dto;
+    }
+
+    public void updateFromDto(UpdEventUserRequest updEventUserRequest, Event event) {
+        if (updEventUserRequest == null || event == null) return;
+
+        if (updEventUserRequest.getEventDate() != null)
+            event.setEventDate(toInstantForUpdate(updEventUserRequest.getEventDate(), event.getEventDate()));
+
+        if (updEventUserRequest.getPaid() != null)
+            event.setPaid(updEventUserRequest.getPaid());
+
+        if (updEventUserRequest.getParticipantLimit() != null)
+            event.setParticipantLimit(updEventUserRequest.getParticipantLimit());
+
+        if (updEventUserRequest.getRequestModeration() != null)
+            event.setRequestModeration(updEventUserRequest.getRequestModeration());
+
+        if (updEventUserRequest.getDescription() != null)
+            event.setDescription(updEventUserRequest.getDescription());
+
+        if (updEventUserRequest.getTitle() != null)
+            event.setTitle(updEventUserRequest.getTitle());
+
+        if (updEventUserRequest.getAnnotation() != null)
+            event.setAnnotation(updEventUserRequest.getAnnotation());
+    }
+
+    public void updateFromDto(UpdEventAdminRequest updEventAdminRequest, Event event) {
+        if (updEventAdminRequest == null || event == null) return;
+
+        if (updEventAdminRequest.getEventDate() != null)
+            event.setEventDate(toInstantForUpdate(updEventAdminRequest.getEventDate(), event.getEventDate()));
+
+        if (updEventAdminRequest.getPaid() != null)
+            event.setPaid(updEventAdminRequest.getPaid());
+
+        if (updEventAdminRequest.getParticipantLimit() != null)
+            event.setParticipantLimit(updEventAdminRequest.getParticipantLimit());
+
+        if (updEventAdminRequest.getRequestModeration() != null)
+            event.setRequestModeration(updEventAdminRequest.getRequestModeration());
+
+        if (updEventAdminRequest.getDescription() != null)
+            event.setDescription(updEventAdminRequest.getDescription());
+
+        if (updEventAdminRequest.getTitle() != null)
+            event.setTitle(updEventAdminRequest.getTitle());
+
+        if (updEventAdminRequest.getAnnotation() != null)
+            event.setAnnotation(updEventAdminRequest.getAnnotation());
+    }
+
+    public Instant toInstantForMap(LocalDateTime dateTime) {
         return dateTime != null ? dateTime.toInstant(ZoneOffset.UTC) : null;
     }
 
-    default LocalDateTime toLocalDateTimeForMap(Instant instant) {
+    public LocalDateTime toLocalDateTimeForMap(Instant instant) {
         return instant != null ? LocalDateTime.ofInstant(instant, ZoneOffset.UTC) : null;
     }
 
-    default Instant toInstantForUpdate(LocalDateTime newDateTime, Instant currentValue) {
+    public Instant toInstantForUpdate(LocalDateTime newDateTime, Instant currentValue) {
         return newDateTime != null ? newDateTime.toInstant(ZoneOffset.UTC) : currentValue;
     }
 }

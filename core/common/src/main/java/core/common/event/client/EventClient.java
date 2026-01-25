@@ -2,13 +2,13 @@ package core.common.event.client;
 
 import core.common.event.dto.*;
 import core.common.requests.dto.ParticipationRequestDto;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
-@FeignClient(name = "main-service")
+@FeignClient(name = "main-service", contextId = "event-service")
 public interface EventClient {
 
     String ADMIN_PREFIX = "/admin/events";
@@ -49,11 +49,17 @@ public interface EventClient {
                                            @PathVariable Long eventId,
                                            @RequestBody EventRequestStatusUpdateRequest updDto);
 
-    @GetMapping(PUBLIC_PREFIX + "/{eventId}")
-    EventFullDto publicSearchOne(@PathVariable Long eventId,
-                                 HttpServletRequest request);
+    @GetMapping(PUBLIC_PREFIX + "/{categoryId}/exist")
+    boolean existsByCategoryId(@PathVariable Long categoryId);
 
-    @GetMapping(PUBLIC_PREFIX)
-    List<EventFullDto> publicSearchMany(@ModelAttribute UserEventSearchParams params,
-                                        HttpServletRequest request);
+    @GetMapping(PUBLIC_PREFIX + "/findAllById")
+    List<EventShortDto> findAllById(@RequestParam Set<Long> eventId);
+
+//    @GetMapping(PUBLIC_PREFIX + "/{eventId}")
+//    EventFullDto publicSearchOne(@PathVariable Long eventId,
+//                                 HttpServletRequest request);
+//
+//    @GetMapping(PUBLIC_PREFIX)
+//    List<EventFullDto> publicSearchMany(@ModelAttribute UserEventSearchParams params,
+//                                        HttpServletRequest request);
 }

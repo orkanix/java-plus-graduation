@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "main-service")
+@FeignClient(name = "main-service", contextId = "requests-service")
 public interface RequestsClient {
 
     String PRIVATE_PREFIX = "/users/{userId}/requests";

@@ -22,15 +22,11 @@ public class Request {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "event_id", foreignKey = @ForeignKey(name = "fk_requests_events"))
-    @ToString.Exclude
-    private Event event;
+    @Column(name = "event_id", nullable = false)
+    private Long event;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_requests_users"))
-    @ToString.Exclude
-    private User requester;
+    @Column(name = "user_id", nullable = false)
+    private Long requester;
 
     @Column
     @Builder.Default
