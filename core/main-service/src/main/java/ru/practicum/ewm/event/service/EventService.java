@@ -3,6 +3,7 @@ package ru.practicum.ewm.event.service;
 import core.common.event.dto.*;
 import core.common.requests.dto.ParticipationRequestDto;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 import java.util.Set;
@@ -35,4 +36,8 @@ public interface EventService {
     boolean existsByCategoryId(Long categoryId);
 
     List<EventShortDto> findAllById(Set<Long> eventId);
+
+    boolean existsByIdAndInitiator(Long userId, Long eventId);
+
+    EventShortDto findById(Long eventId);
 }

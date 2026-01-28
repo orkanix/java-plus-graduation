@@ -1,5 +1,6 @@
 package ru.practicum.ewm.comment.service;
 
+import core.common.event.client.EventClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -11,10 +12,9 @@ import ru.practicum.ewm.comment.mapper.CommentMapper;
 import ru.practicum.ewm.comment.model.Comment;
 import ru.practicum.ewm.comment.model.CommentState;
 import ru.practicum.ewm.comment.repository.CommentRepository;
-import ru.practicum.ewm.event.repository.EventRepository;
 import core.common.exception.ConflictException;
 import core.common.exception.NotFoundException;
-import ru.practicum.ewm.user.repository.UserRepository;
+import ru.practicum.ewm.user.service.UserService;
 
 import java.util.List;
 
@@ -23,8 +23,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CommentServiceImpl implements CommentService {
 
-    private final UserRepository userRepository;
-    private final EventRepository eventRepository;
+    private final UserService userService;
+    private final EventClient eventClient;
     private final CommentRepository commentRepository;
 
     private final CommentMapper commentMapper;
@@ -34,7 +34,7 @@ public class CommentServiceImpl implements CommentService {
     public CommentFullDto hide(Long eventId, Long commentId, boolean published) {
         log.info("Метод hide(); eventId={}; commentId={}", eventId, commentId);
 
-        if (!commentRepository.existsByIdAndEventId(commentId, eventId)) {
+        if (!commentRepository.existsByIdAndEvent(commentId, eventId)) {
             throw new ConflictException("Комментарий не принадлежит указанному событию; eventId={}; commentId={}",
                     eventId, commentId);
         }
@@ -57,7 +57,7 @@ public class CommentServiceImpl implements CommentService {
     public List<CommentPublicDto> getAllBy(Long eventId) {
         log.info("Метод getAllBy(); eventId = {}", eventId);
 
-        List<Comment> comments = commentRepository.findByEventId(eventId);
+        List<Comment> comments = commentRepository.findByEvent(eventId);
 
         return comments.stream()
                 .map(commentMapper::toPublicDto)
@@ -70,16 +70,14 @@ public class CommentServiceImpl implements CommentService {
     public CommentFullDto add(NewCommentDto dto, Long eventId, Long userId) {
         log.info("Метод add(); eventId={}, userId={}; dto={}", eventId, userId, dto);
 
-        if (!eventRepository.existsByIdAndInitiator(eventId, userId)) {
+        if (!eventClient.existsByIdAndInitiator(eventId, userId)) {
             throw new ConflictException("Инициатор не может комментировать свои события; eventId={}, userId={}",
                     eventId, userId);
         }
 
         Comment comment = commentMapper.toEntity(dto);
-        comment.setAuthor(userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User id={}, не найден", userId)));
-        comment.setEvent(eventRepository
-                .findById(eventId).orElseThrow(() -> new NotFoundException("Event id={}, не найден", eventId)));
+        comment.setAuthor(userService.findUserById(userId).getId());
+        comment.setEvent(eventClient.findById(eventId).getId());
         comment = commentRepository.save(comment);
 
         return commentMapper.toFullDto(comment);
@@ -89,7 +87,7 @@ public class CommentServiceImpl implements CommentService {
     public List<CommentFullDto> getAllBy(Long userId, Long eventId) {
         log.info("Метод getUserCommentsForEvent(); eventId={}; commentId={}", userId, eventId);
 
-        List<Comment> comments = commentRepository.findAllByEventIdAndAuthorId(eventId, userId);
+        List<Comment> comments = commentRepository.findAllByEventAndAuthor(eventId, userId);
 
         return comments.stream()
                 .map(commentMapper::toFullDto)
@@ -122,15 +120,19 @@ public class CommentServiceImpl implements CommentService {
     private void checkExistsUserAndComment(Long userId, Long commentId) {
         log.info("Метод checkExistsUserAndComment(); userId={}, commentId={}", userId, commentId);
 
-        if (!commentRepository.existsByIdAndAuthorId(commentId, userId)) {
-            if (!userRepository.existsById(userId)) {
-                throw new NotFoundException("User id={}, не существует", userId);
-            } else if (!commentRepository.existsById(commentId)) {
-                throw new NotFoundException("Comment id={}, не существует", commentId);
-            } else {
-                throw new ConflictException("Пользователь не является автором комментария; " +
-                        "userId={}, commentId={}", userId, commentId);
-            }
+        try {
+            userService.findUserById(userId);
+        } catch (NotFoundException e) {
+            throw new NotFoundException("User id={} не существует", userId);
+        }
+
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new NotFoundException("Comment id={} не существует", commentId));
+
+        if (!comment.getAuthor().equals(userId)) {
+            throw new ConflictException("Пользователь не является автором комментария; userId={}, commentId={}",
+                    userId, commentId);
         }
     }
+
 }

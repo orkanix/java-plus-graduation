@@ -71,4 +71,9 @@ public class PrivateEventController {
         log.debug("Метод updateRequest(); userId={}, eventId={}", userId, eventId);
         return eventService.updateRequests(userId, eventId, updDto);
     }
+
+    @GetMapping("/{eventId}/existsByIdAndInitiator")
+    public boolean existsByIdAndInitiator(@PathVariable Long userId, @PathVariable Long eventId) {
+        return eventService.existsByIdAndInitiator(userId, eventId);
+    }
 }

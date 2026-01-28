@@ -255,6 +255,20 @@ public class EventServiceImpl implements EventService {
         }).toList();
     }
 
+    @Override
+    public boolean existsByIdAndInitiator(Long userId, Long eventId) {
+        return eventRepository.existsByIdAndInitiator(eventId, userId);
+    }
+
+    @Override
+    public EventShortDto findById(Long eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event id={}, не найден", eventId));
+        CategoryDto category = categoryClient.getCategory(event.getCategory());
+        UserShortDto user = userClient.findUserById(event.getInitiator());
+
+        return eventMapper.toShortDto(event, category, user);
+    }
 
     // Admin API:
     @Override

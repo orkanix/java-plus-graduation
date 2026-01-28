@@ -49,11 +49,18 @@ public interface EventClient {
                                            @PathVariable Long eventId,
                                            @RequestBody EventRequestStatusUpdateRequest updDto);
 
+    @GetMapping(PRIVATE_PREFIX + "/{eventId}/existsByIdAndInitiator")
+    boolean existsByIdAndInitiator(@PathVariable Long userId, @PathVariable Long eventId);
+
     @GetMapping(PUBLIC_PREFIX + "/{categoryId}/exist")
     boolean existsByCategoryId(@PathVariable Long categoryId);
 
     @GetMapping(PUBLIC_PREFIX + "/findAllById")
     List<EventShortDto> findAllById(@RequestParam Set<Long> eventId);
+
+    @GetMapping(PUBLIC_PREFIX + "/{eventId}/findById")
+    EventShortDto findById(@PathVariable Long eventId);
+
 
 //    @GetMapping(PUBLIC_PREFIX + "/{eventId}")
 //    EventFullDto publicSearchOne(@PathVariable Long eventId,

@@ -45,4 +45,9 @@ public class PublicEventController {
     public List<EventShortDto> findAllById(@RequestParam Set<Long> eventId) {
         return eventService.findAllById(eventId);
     }
+
+    @GetMapping("/{eventId}/findById")
+    public EventShortDto findById(@PathVariable Long eventId) {
+        return eventService.findById(eventId);
+    }
 }
