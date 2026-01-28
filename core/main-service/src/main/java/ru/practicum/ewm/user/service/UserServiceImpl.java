@@ -1,6 +1,5 @@
 package ru.practicum.ewm.user.service;
 
-import core.common.category.dto.CategoryDto;
 import core.common.user.dto.NewUserRequest;
 import core.common.user.dto.UserDto;
 import core.common.user.dto.UserShortDto;
@@ -22,7 +21,6 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;

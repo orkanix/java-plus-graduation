@@ -18,11 +18,11 @@ import ru.practicum.ewm.user.model.User;
 import ru.practicum.ewm.user.repository.UserRepository;
 
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class RequestServiceImpl implements RequestService {
 
     private final UserRepository userRepository;
@@ -104,6 +104,32 @@ public class RequestServiceImpl implements RequestService {
         return requestMapper.toDto(request);
     }
 
+    @Override
+    public List<ParticipationRequestDto> findAllByEvent(Long eventId) {
+        return requestRepository.findAllByEvent(eventId).stream().map(requestMapper::toDto).toList();
+    }
+
+    @Override
+    public List<ParticipationRequestDto> findAllByIdIn(Set<Long> requestIds) {
+        return requestRepository.findAllByIdIn(requestIds).stream().map(requestMapper::toDto).toList();
+    }
+
+    @Override
+    public List<ParticipationRequestDto> updateStatuses(List<ParticipationRequestDto> requests, RequestStatus status) {
+        List<ParticipationRequestDto> updatedRequests = requests.stream()
+                .peek(request -> request.setStatus(status))
+                .toList();
+
+        return requestRepository
+                .saveAllAndFlush(
+                        updatedRequests.stream()
+                                .map(requestMapper::toEntity)
+                                .toList()
+                )
+                .stream()
+                .map(requestMapper::toDto)
+                .toList();
+    }
 
     private User findUserBy(Long userId) {
         return userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User id={} не найден", userId));

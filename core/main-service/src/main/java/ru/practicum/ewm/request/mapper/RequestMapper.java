@@ -32,6 +32,19 @@ public class RequestMapper {
         return dto;
     }
 
+    public Request toEntity(ParticipationRequestDto dto) {
+        if (dto == null) return null;
+
+        Request request = new Request();
+        request.setId(dto.getId());
+        request.setEvent(dto.getEvent());
+        request.setRequester(dto.getRequester());
+        request.setStatus(dto.getStatus());
+        request.setCreated(dto.getCreated() != null ? dto.getCreated().toInstant(ZoneOffset.UTC) : null);
+
+        return request;
+    }
+
     private LocalDateTime toLocalDateTime(Instant instant) {
         return instant != null ? LocalDateTime.ofInstant(instant, ZoneOffset.UTC) : null;
     }

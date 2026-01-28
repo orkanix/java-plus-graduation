@@ -5,10 +5,10 @@ import com.querydsl.core.types.dsl.Expressions;
 import core.common.category.client.CategoryClient;
 import core.common.category.dto.CategoryDto;
 import core.common.event.dto.*;
+import core.common.requests.client.RequestsClient;
 import core.common.requests.dto.ParticipationRequestDto;
 import core.common.requests.dto.RequestStatus;
 import core.common.user.client.UserClient;
-import core.common.user.dto.UserDto;
 import core.common.user.dto.UserShortDto;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -28,9 +28,6 @@ import ru.practicum.ewm.event.model.QEvent;
 import ru.practicum.ewm.event.repository.EventRepository;
 import core.common.exception.ConflictException;
 import core.common.exception.NotFoundException;
-import ru.practicum.ewm.request.mapper.RequestMapper;
-import ru.practicum.ewm.request.model.Request;
-import ru.practicum.ewm.request.repository.RequestRepository;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -44,16 +41,14 @@ import static java.time.ZoneOffset.UTC;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class EventServiceImpl implements EventService {
 
     private final UserClient userClient;
     private final EventRepository eventRepository;
-    private final RequestRepository requestRepository;
+    private final RequestsClient requestsClient;
     private final CategoryClient categoryClient;
 
     private final EventMapper eventMapper;
-    private final RequestMapper requestMapper;
 
     private final StatsClient statsClient;
 
@@ -153,10 +148,7 @@ public class EventServiceImpl implements EventService {
     public List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId) {
         log.debug("Метод getUserRequests(); userId={}, eventId={}", userId, eventId);
 
-        List<Request> requests = requestRepository.findAllByEvent(eventId);
-        return requests.stream()
-                .map(requestMapper::toDto)
-                .toList();
+        return requestsClient.findAllByEvent(eventId);
     }
 
     @Override
@@ -166,7 +158,7 @@ public class EventServiceImpl implements EventService {
 
 
         Event event = this.findEventBy(eventId);
-        List<Request> requests = requestRepository.findAllByIdIn(updDto.getRequestIds());
+        List<ParticipationRequestDto> requests = requestsClient.findAllByIdIn(updDto.getRequestIds());
 
         if (requests.isEmpty()) {
             return UpdRequestsStatusResult.builder()
@@ -187,16 +179,16 @@ public class EventServiceImpl implements EventService {
                         ? requests.size()
                         : event.getParticipantLimit().intValue() - event.getConfirmedRequests().intValue();
 
-                List<Request> toConfirm = requests.size() <= availableSlots
+                List<ParticipationRequestDto> toConfirm = requests.size() <= availableSlots
                         ? requests
                         : requests.subList(0, availableSlots);
 
-                List<Request> toReject = requests.size() <= availableSlots
+                List<ParticipationRequestDto> toReject = requests.size() <= availableSlots
                         ? List.of()
                         : requests.subList(availableSlots, requests.size());
 
-                List<ParticipationRequestDto> confirmedDtos = processRequests(toConfirm, RequestStatus.CONFIRMED);
-                List<ParticipationRequestDto> rejectedDtos = processRequests(toReject, RequestStatus.REJECTED);
+                List<ParticipationRequestDto> confirmedDtos = requestsClient.updateStatuses(toConfirm, RequestStatus.CONFIRMED);
+                List<ParticipationRequestDto> rejectedDtos = requestsClient.updateStatuses(toReject, RequestStatus.REJECTED);
 
                 // Обновляем количество подтверждённых
                 event.setConfirmedRequests(event.getConfirmedRequests() + confirmedDtos.size());
@@ -216,12 +208,14 @@ public class EventServiceImpl implements EventService {
                             }
                             r.setStatus(RequestStatus.REJECTED);
                         })
-                        .map(requestMapper::toDto)
                         .toList();
+
+                List<ParticipationRequestDto> updatedDtos =
+                        requestsClient.updateStatuses(rejectedDtos, RequestStatus.REJECTED);
 
                 result = UpdRequestsStatusResult.builder()
                         .confirmedRequests(List.of())
-                        .rejectedRequests(rejectedDtos)
+                        .rejectedRequests(updatedDtos)
                         .build();
             }
 
@@ -453,14 +447,6 @@ public class EventServiceImpl implements EventService {
 
             return eventMapper.toFullDto(eventEl, category, user);
         }).getContent();
-    }
-
-
-    private List<ParticipationRequestDto> processRequests(List<Request> requests, RequestStatus status) {
-        return requests.stream()
-                .peek(r -> r.setStatus(status))
-                .map(requestMapper::toDto)
-                .toList();
     }
 
     private Event findEventBy(Long eventId) {
