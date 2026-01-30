@@ -41,8 +41,8 @@ public interface EventClient {
                         @RequestBody final UpdEventUserRequest updDto);
 
     @GetMapping(PRIVATE_PREFIX + "/{eventId}/requests")
-    List<ParticipationRequestDto> getUserRequests(@PathVariable Long userId,
-                                                  @PathVariable Long eventId);
+    List<ParticipationRequestDto> getUserEvents(@PathVariable Long userId,
+                                                @PathVariable Long eventId);
 
     @PatchMapping(PRIVATE_PREFIX + "/{eventId}/requests")
     UpdRequestsStatusResult updateRequests(@PathVariable Long userId,
@@ -61,12 +61,9 @@ public interface EventClient {
     @GetMapping(PUBLIC_PREFIX + "/{eventId}/findById")
     EventShortDto findById(@PathVariable Long eventId);
 
+    @GetMapping(PUBLIC_PREFIX + "/{eventId}/findByIdFull")
+    EventFullDto findByIdFull(@PathVariable Long eventId);
 
-//    @GetMapping(PUBLIC_PREFIX + "/{eventId}")
-//    EventFullDto publicSearchOne(@PathVariable Long eventId,
-//                                 HttpServletRequest request);
-//
-//    @GetMapping(PUBLIC_PREFIX)
-//    List<EventFullDto> publicSearchMany(@ModelAttribute UserEventSearchParams params,
-//                                        HttpServletRequest request);
+    @PutMapping(PUBLIC_PREFIX + "/setConfirmedRequests")
+    EventFullDto setConfirmedRequests(@RequestBody EventFullDto event);
 }

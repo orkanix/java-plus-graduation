@@ -39,4 +39,8 @@ public interface EventService {
     boolean existsByIdAndInitiator(Long userId, Long eventId);
 
     EventShortDto findById(Long eventId);
+
+    EventFullDto findByIdFull(Long eventId);
+
+    EventFullDto setConfirmedRequests(EventFullDto event);
 }

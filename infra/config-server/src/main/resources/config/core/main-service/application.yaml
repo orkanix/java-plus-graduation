@@ -22,3 +22,7 @@ spring:
 logging:
   level:
     ru.practicum.ewm: DEBUG
+
+feign:
+  httpclient:
+    enabled: true

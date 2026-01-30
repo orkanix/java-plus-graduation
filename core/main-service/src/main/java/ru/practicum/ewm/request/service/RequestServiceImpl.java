@@ -1,21 +1,21 @@
 package ru.practicum.ewm.request.service;
 
+import core.common.event.client.EventClient;
+import core.common.event.dto.EventFullDto;
 import core.common.event.dto.EventState;
 import core.common.requests.dto.ParticipationRequestDto;
 import core.common.requests.dto.RequestStatus;
+import core.common.user.client.UserClient;
+import core.common.user.dto.UserShortDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.ewm.event.model.Event;
-import ru.practicum.ewm.event.repository.EventRepository;
 import core.common.exception.ConflictException;
 import core.common.exception.NotFoundException;
 import ru.practicum.ewm.request.mapper.RequestMapper;
 import ru.practicum.ewm.request.model.Request;
 import ru.practicum.ewm.request.repository.RequestRepository;
-import ru.practicum.ewm.user.model.User;
-import ru.practicum.ewm.user.repository.UserRepository;
 
 import java.util.List;
 import java.util.Set;
@@ -25,8 +25,8 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class RequestServiceImpl implements RequestService {
 
-    private final UserRepository userRepository;
-    private final EventRepository eventRepository;
+    private final UserClient userClient;
+    private final EventClient eventClient;
     private final RequestRepository requestRepository;
 
     private final RequestMapper requestMapper;
@@ -36,14 +36,17 @@ public class RequestServiceImpl implements RequestService {
     public ParticipationRequestDto create(Long userId, Long eventId) {
         log.debug("Метод createRequest(); userId={}, eventId={}", userId, eventId);
 
-        User user = this.findUserBy(userId);
-        Event event = this.findEventBy(eventId);
+        UserShortDto user = userClient.findUserById(userId);
+        EventFullDto event = eventClient.findByIdFull(eventId);
 
-        if (eventRepository.existsByIdAndInitiator(eventId, userId)) {
+        log.info(user.toString());
+        log.info(event.toString());
+        log.info(eventClient.findById(event.getId()).toString());
+        if (eventClient.findById(event.getId()).getInitiator().getId().equals(user.getId())) {
             throw new ConflictException("Нельзя участвовать в собственном событии");
         }
 
-        if (requestRepository.existsByEventAndRequester(eventId, userId)) {
+        if (requestRepository.existsByEventAndRequester(event.getId(), user.getId())) {
             throw new ConflictException("Request уже создан ранее");
         }
 
@@ -63,7 +66,8 @@ public class RequestServiceImpl implements RequestService {
 
         if (status == RequestStatus.CONFIRMED) {
             event.setConfirmedRequests(event.getConfirmedRequests() + 1);
-            eventRepository.save(event);
+
+            eventClient.setConfirmedRequests(event);
         }
 
         Request request = Request.builder()
@@ -92,7 +96,7 @@ public class RequestServiceImpl implements RequestService {
     public ParticipationRequestDto cancel(Long userId, Long requestId) {
         log.debug("Метод cancel(); userId={}, requestId={}", userId, requestId);
 
-        this.findUserBy(userId);
+        userClient.findUserById(userId);
         Request request = this.findRequestBy(requestId);
         request.setStatus(RequestStatus.CANCELED);
 
@@ -131,17 +135,8 @@ public class RequestServiceImpl implements RequestService {
                 .toList();
     }
 
-    private User findUserBy(Long userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User id={} не найден", userId));
-    }
-
     private Request findRequestBy(Long requestId) {
         return requestRepository.findById(requestId)
                 .orElseThrow(() -> new NotFoundException("Request id={} не найден", requestId));
-    }
-
-    private Event findEventBy(Long eventId) {
-        return eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("Event id={} не найден", eventId));
     }
 }

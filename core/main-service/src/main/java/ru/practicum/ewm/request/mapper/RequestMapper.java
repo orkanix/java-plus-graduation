@@ -1,5 +1,7 @@
 package ru.practicum.ewm.request.mapper;
 
+import core.common.event.dto.EventFullDto;
+import core.common.event.dto.UpdEventUserRequest;
 import core.common.requests.dto.ParticipationRequestDto;
 import org.springframework.stereotype.Component;
 import ru.practicum.ewm.request.model.Request;

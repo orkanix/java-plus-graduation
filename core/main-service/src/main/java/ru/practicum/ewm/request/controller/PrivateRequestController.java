@@ -1,6 +1,7 @@
 package ru.practicum.ewm.request.controller;
 
 import core.common.requests.dto.ParticipationRequestDto;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -19,21 +20,21 @@ public class PrivateRequestController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ParticipationRequestDto createRequest(@PathVariable Long userId,
-                                                                 @RequestParam Long eventId) {
+    public ParticipationRequestDto createRequest(@PathVariable @Positive Long userId,
+                                                                 @RequestParam @Positive Long eventId) {
         log.debug("Метод createRequest(); userId={}, eventId={}", userId, eventId);
         return requestService.create(userId, eventId);
     }
 
     @GetMapping
-    public List<ParticipationRequestDto> getRequests(@PathVariable Long userId) {
+    public List<ParticipationRequestDto> getRequests(@PathVariable @Positive Long userId) {
         log.debug("Метод getRequests(); userId={}", userId);
         return requestService.getAllBy(userId);
     }
 
     @PatchMapping("{requestId}/cancel")
-    public ParticipationRequestDto cancelRequest(@PathVariable Long userId,
-                                                                 @PathVariable Long requestId) {
+    public ParticipationRequestDto cancelRequest(@PathVariable @Positive Long userId,
+                                                                 @PathVariable @Positive Long requestId) {
         log.debug("Метод cancelRequest(); userId={}, requestId={}", userId, requestId);
         return requestService.cancel(userId, requestId);
     }

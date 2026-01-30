@@ -63,7 +63,6 @@ public class EventServiceImpl implements EventService {
         CategoryDto category = categoryClient.getCategory(newDto.getCategory());
 
         Event event = eventMapper.toEntity(newDto, user.getId());
-        event.setLocation(newDto.getLocation());
         event.setInitiator(user.getId());
         event.setCategory(category.getId());
         event = eventRepository.save(event);
@@ -262,6 +261,24 @@ public class EventServiceImpl implements EventService {
         UserShortDto user = userClient.findUserById(event.getInitiator());
 
         return eventMapper.toShortDto(event, category, user);
+    }
+
+    @Override
+    public EventFullDto findByIdFull(Long eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event id={}, не найден", eventId));
+        CategoryDto category = categoryClient.getCategory(event.getCategory());
+        UserShortDto user = userClient.findUserById(event.getInitiator());
+
+        return eventMapper.toFullDto(event, category, user);
+    }
+
+    @Override
+    public EventFullDto setConfirmedRequests(EventFullDto event) {
+        CategoryDto category = categoryClient.getCategory(event.getCategory().getId());
+        UserShortDto user = userClient.findUserById(event.getInitiator().getId());
+
+        return eventMapper.toFullDto(eventRepository.save(eventMapper.toEntity(event)), category, user);
     }
 
     // Admin API:

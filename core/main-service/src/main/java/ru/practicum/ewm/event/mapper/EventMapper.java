@@ -6,6 +6,7 @@ import core.common.user.dto.UserShortDto;
 import org.mapstruct.*;
 import org.springframework.stereotype.Component;
 import ru.practicum.ewm.event.model.Event;
+import ru.practicum.ewm.event.model.Location;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -29,6 +30,40 @@ public class EventMapper {
 
         event.setCategory(newEventDto.getCategory());
         event.setInitiator(userId);
+
+        if (newEventDto.getLocation() != null) {
+            event.setLocation(toLocationEntity(newEventDto.getLocation()));
+        }
+
+        return event;
+    }
+
+    public Event toEntity(EventFullDto eventFullDto) {
+        if (eventFullDto == null) return null;
+
+        Event event = new Event();
+
+        event.setId(eventFullDto.getId());
+        event.setTitle(eventFullDto.getTitle());
+        event.setAnnotation(eventFullDto.getAnnotation());
+        event.setDescription(eventFullDto.getDescription());
+        event.setEventDate(toInstantForMap(eventFullDto.getEventDate()));
+        event.setPaid(eventFullDto.getPaid() != null ? eventFullDto.getPaid() : false);
+        event.setParticipantLimit(eventFullDto.getParticipantLimit() != null ? eventFullDto.getParticipantLimit() : 0);
+        event.setRequestModeration(eventFullDto.getRequestModeration() != null ? eventFullDto.getRequestModeration() : true);
+        event.setConfirmedRequests(eventFullDto.getConfirmedRequests() != null ? eventFullDto.getConfirmedRequests() : 0);
+        event.setState(eventFullDto.getState() != null ? eventFullDto.getState() : EventState.PENDING);
+
+        if (eventFullDto.getEventDate() != null)
+            event.setEventDate(toInstantForUpdate(eventFullDto.getEventDate(), event.getEventDate()));
+
+
+        event.setCategory(eventFullDto.getCategory().getId());
+        event.setInitiator(eventFullDto.getInitiator().getId());
+
+        if (eventFullDto.getLocation() != null) {
+            event.setLocation(toLocationEntity(eventFullDto.getLocation()));
+        }
 
         return event;
     }
@@ -69,7 +104,10 @@ public class EventMapper {
         dto.setState(event.getState());
         dto.setViews(event.getViews());
         dto.setInitiator(userShortDto);
-        dto.setLocation(event.getLocation());
+
+        if (event.getLocation() != null) {
+            dto.setLocation(toLocationDto(event.getLocation()));
+        }
 
         return dto;
     }
@@ -97,6 +135,9 @@ public class EventMapper {
 
         if (updEventUserRequest.getAnnotation() != null)
             event.setAnnotation(updEventUserRequest.getAnnotation());
+
+        if (updEventUserRequest.getLocation() != null)
+            event.setLocation(toLocationEntity(updEventUserRequest.getLocation()));
     }
 
     public void updateFromDto(UpdEventAdminRequest updEventAdminRequest, Event event) {
@@ -122,6 +163,9 @@ public class EventMapper {
 
         if (updEventAdminRequest.getAnnotation() != null)
             event.setAnnotation(updEventAdminRequest.getAnnotation());
+
+        if (updEventAdminRequest.getLocation() != null)
+            event.setLocation(toLocationEntity(updEventAdminRequest.getLocation()));
     }
 
     public Instant toInstantForMap(LocalDateTime dateTime) {
@@ -134,5 +178,23 @@ public class EventMapper {
 
     public Instant toInstantForUpdate(LocalDateTime newDateTime, Instant currentValue) {
         return newDateTime != null ? newDateTime.toInstant(ZoneOffset.UTC) : currentValue;
+    }
+
+    private LocationDto toLocationDto(Location location) {
+        if (location == null) return null;
+
+        LocationDto dto = new LocationDto();
+        dto.setLat(location.getLat());
+        dto.setLon(location.getLon());
+        return dto;
+    }
+
+    private Location toLocationEntity(LocationDto dto) {
+        if (dto == null) return null;
+
+        Location location = new Location();
+        location.setLat(dto.getLat());
+        location.setLon(dto.getLon());
+        return location;
     }
 }

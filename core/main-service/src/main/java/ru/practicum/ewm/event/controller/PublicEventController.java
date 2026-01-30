@@ -50,4 +50,14 @@ public class PublicEventController {
     public EventShortDto findById(@PathVariable Long eventId) {
         return eventService.findById(eventId);
     }
+
+    @GetMapping("/{eventId}/findByIdFull")
+    public EventFullDto findByIdFull(@PathVariable Long eventId) {
+        return eventService.findByIdFull(eventId);
+    }
+
+    @PutMapping("/setConfirmedRequests")
+    public EventFullDto setConfirmedRequests(@RequestBody EventFullDto event) {
+        return eventService.setConfirmedRequests(event);
+    }
 }
