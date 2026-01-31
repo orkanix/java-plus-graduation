@@ -4,18 +4,32 @@ server:
 spring:
   cloud:
     gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
       routes:
-        - id: admin_route
-          uri: lb://main-service
+        - id: category-service
+          uri: lb://CATEGORY-SERVICE
           predicates:
-            - Path=/admin/**
+            - Path=/categories/**, /admin/categories/**
 
-        - id: public_route
-          uri: lb://main-service
+        - id: compilation-service
+          uri: lb://COMPILATION-SERVICE
           predicates:
-            - Path=/public/**
+            - Path=/compilations/**, /admin/compilations/**
 
-        - id: neutral_route
-          uri: lb://main-service
+        - id: event-service
+          uri: lb://EVENT-SERVICE
           predicates:
-            - Path=/events/**,/users/**,/compilations/**,/categories/**
+            - Path=/events/**, /users/*/events/**, /admin/events/**
+
+        - id: requests-service
+          uri: lb://REQUESTS-SERVICE
+          predicates:
+            - Path=/users/*/requests/**
+
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/admin/users/**

@@ -1,6 +1,7 @@
 package ru.practicum.ewm.comment.service;
 
 import core.common.event.client.EventClient;
+import core.common.user.client.UserClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,7 +15,6 @@ import ru.practicum.ewm.comment.model.CommentState;
 import ru.practicum.ewm.comment.repository.CommentRepository;
 import core.common.exception.ConflictException;
 import core.common.exception.NotFoundException;
-import ru.practicum.ewm.user.service.UserService;
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CommentServiceImpl implements CommentService {
 
-    private final UserService userService;
+    private final UserClient userClient;
     private final EventClient eventClient;
     private final CommentRepository commentRepository;
 
@@ -76,7 +76,7 @@ public class CommentServiceImpl implements CommentService {
         }
 
         Comment comment = commentMapper.toEntity(dto);
-        comment.setAuthor(userService.findUserById(userId).getId());
+        comment.setAuthor(userClient.findUserById(userId).getId());
         comment.setEvent(eventClient.findById(eventId).getId());
         comment = commentRepository.save(comment);
 
@@ -121,7 +121,7 @@ public class CommentServiceImpl implements CommentService {
         log.info("Метод checkExistsUserAndComment(); userId={}, commentId={}", userId, commentId);
 
         try {
-            userService.findUserById(userId);
+            userClient.findUserById(userId);
         } catch (NotFoundException e) {
             throw new NotFoundException("User id={} не существует", userId);
         }

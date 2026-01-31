@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Set;
 
-@FeignClient(name = "main-service", contextId = "event-service")
+@FeignClient(name = "event-service")
 public interface EventClient {
 
     String ADMIN_PREFIX = "/admin/events";

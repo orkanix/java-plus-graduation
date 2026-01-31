@@ -1,0 +1,59 @@
+package core.user.controller;
+
+import core.common.user.dto.NewUserRequest;
+import core.common.user.dto.UserDto;
+import core.common.user.dto.UserShortDto;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import core.user.service.UserService;
+
+import java.util.List;
+
+@RestController
+@Slf4j
+@Validated
+@RequestMapping("/admin/users")
+@RequiredArgsConstructor
+public class AdminUserController {
+
+    private final UserService userService;
+
+    @GetMapping
+    public List<UserDto> findAll(@RequestParam(required = false) List<Long> ids,
+                                 @RequestParam(defaultValue = "0", required = false) @PositiveOrZero Integer from,
+                                 @RequestParam(defaultValue = "10", required = false) @Positive Integer size) {
+        log.debug("Метод findAll(); ids={}, from={}, size={}", ids, from, size);
+        return userService.findAllBy(ids, from, size);
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public UserDto add(@RequestBody @Valid NewUserRequest newDto) {
+        log.debug("Метод add(); newDto={}", newDto);
+
+        return userService.add(newDto);
+    }
+
+    @DeleteMapping("/{userId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable @Positive Long userId) {
+        log.debug("Метод delete(); userId={}", userId);
+        userService.delete(userId);
+    }
+
+    @GetMapping("/{userId}")
+    public UserShortDto findUserById(@PathVariable Long userId) {
+        return userService.findUserById(userId);
+    }
+
+    @PostMapping("/getIds")
+    public List<UserShortDto> getUsersByIds(@RequestBody List<Long> usersIds) {
+        return userService.getUsersByIds(usersIds);
+    }
+}

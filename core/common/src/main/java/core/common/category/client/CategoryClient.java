@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "main-service", contextId = "category-service")
+@FeignClient(name = "category-service")
 public interface CategoryClient {
 
     String ADMIN_PREFIX = "/admin/categories";

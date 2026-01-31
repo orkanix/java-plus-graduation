@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Set;
 
-@FeignClient(name = "main-service", contextId = "requests-service")
+@FeignClient(name = "requests-service")
 public interface RequestsClient {
 
     String PRIVATE_PREFIX = "/users/{userId}/requests";

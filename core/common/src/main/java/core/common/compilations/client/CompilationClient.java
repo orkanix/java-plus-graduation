@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "main-service", contextId = "compilation-service")
+@FeignClient(name = "compilation-service")
 public interface CompilationClient {
 
     String ADMIN_PREFIX = "/admin/compilations";
