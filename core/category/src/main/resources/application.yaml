@@ -3,6 +3,7 @@ spring:
     name: category-service
   config:
     import: "configserver:"
+    fail-fast: false
   cloud:
     config:
       discovery:
