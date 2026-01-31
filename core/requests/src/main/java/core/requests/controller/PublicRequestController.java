@@ -2,6 +2,8 @@ package core.requests.controller;
 
 import core.common.requests.dto.ParticipationRequestDto;
 import core.common.requests.dto.RequestStatus;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +21,7 @@ public class PublicRequestController {
     private final RequestService requestService;
 
     @GetMapping("/{eventId}/findAllByEvent")
-    public List<ParticipationRequestDto> findAllByEvent(@PathVariable Long eventId) {
+    public List<ParticipationRequestDto> findAllByEvent(@PathVariable @Positive Long eventId) {
         return requestService.findAllByEvent(eventId);
     }
 
@@ -29,7 +31,8 @@ public class PublicRequestController {
     }
 
     @PostMapping("/updateStatuses/{status}")
-    public List<ParticipationRequestDto> updateStatuses(@RequestBody List<ParticipationRequestDto> requests, @PathVariable RequestStatus status) {
+    public List<ParticipationRequestDto> updateStatuses(@RequestBody List<ParticipationRequestDto> requests,
+                                                        @PathVariable @NotNull RequestStatus status) {
         return requestService.updateStatuses(requests, status);
     }
 }

@@ -8,7 +8,8 @@ import org.springframework.stereotype.Component;
 import core.compilations.model.Compilation;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Component
 public class CompilationMapper {
@@ -50,7 +51,7 @@ public class CompilationMapper {
         dto.setTitle(compilation.getTitle());
         dto.setPinned(compilation.getPinned());
 
-        List<EventShortDto> events = new ArrayList<>();
+        Set<EventShortDto> events = new HashSet<>();
         if (compilation.getEvents() != null) {
             for (Long id : compilation.getEvents()) {
                 EventShortDto e = new EventShortDto();

@@ -73,8 +73,8 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventShortDto> getAllByUser(Long userId, int from, int size) {
-        log.debug("Метод getAllByUser(); userId={}", userId);
+    public List<EventShortDto> findAllByUser(Long userId, int from, int size) {
+        log.debug("Метод findAllByUser(); userId={}", userId);
 
         int page = from / size;
         Pageable pageable = PageRequest.of(page, size, Sort.by("eventDate").descending());
@@ -89,8 +89,8 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto getByUser(Long userId, Long eventId) {
-        log.debug("Метод getByUser(); eventId={}, userId={}", eventId, userId);
+    public EventFullDto findByUser(Long userId, Long eventId) {
+        log.debug("Метод findByUser(); eventId={}, userId={}", eventId, userId);
 
         Event event = eventRepository.findByIdAndInitiator(eventId, userId)
                 .orElseThrow(() -> new NotFoundException("Event id={} у user id={} не найдено", eventId, userId));
@@ -144,8 +144,8 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId) {
-        log.debug("Метод getUserRequests(); userId={}, eventId={}", userId, eventId);
+    public List<ParticipationRequestDto> findEventRequests(Long userId, Long eventId) {
+        log.debug("Метод findEventRequests(); userId={}, eventId={}", userId, eventId);
 
         return requestsClient.findAllByEvent(eventId);
     }
@@ -154,7 +154,6 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public UpdRequestsStatusResult updateRequests(Long userId, Long eventId, EventRequestStatusUpdateRequest updDto) {
         log.debug("Метод updateRequests(), userId={}, eventId={}", userId, eventId);
-
 
         Event event = this.findEventBy(eventId);
         List<ParticipationRequestDto> requests = requestsClient.findAllByIdIn(updDto.getRequestIds());
@@ -231,6 +230,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventShortDto> findAllById(Set<Long> eventId) {
+        log.debug("Метод existsByIdAndInitiator(); eventId: {}", eventId);
 
         List<Event> events = eventRepository.findAllById(eventId);
 
@@ -250,11 +250,15 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public boolean existsByIdAndInitiator(Long userId, Long eventId) {
+        log.debug("Метод existsByIdAndInitiator(); userId: {}, eventId: {}", userId, eventId);
+
         return eventRepository.existsByIdAndInitiator(eventId, userId);
     }
 
     @Override
     public EventShortDto findById(Long eventId) {
+        log.debug("Метод findById(); eventId: {}", eventId);
+
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event id={}, не найден", eventId));
         CategoryDto category = categoryClient.getCategory(event.getCategory());
@@ -265,6 +269,8 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto findByIdFull(Long eventId) {
+        log.debug("Метод findByIdFull(); eventId: {}", eventId);
+
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event id={}, не найден", eventId));
         CategoryDto category = categoryClient.getCategory(event.getCategory());
@@ -275,6 +281,8 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto setConfirmedRequests(EventFullDto event) {
+        log.debug("Метод setConfirmedRequests(); event: {}", event);
+
         CategoryDto category = categoryClient.getCategory(event.getCategory().getId());
         UserShortDto user = userClient.findUserById(event.getInitiator().getId());
 
@@ -381,8 +389,8 @@ public class EventServiceImpl implements EventService {
 
     // Public API:
     @Override
-    public EventFullDto getPublicBy(Long eventId, HttpServletRequest request) {
-        log.debug("Метод getPublicById(); eventId={}", eventId);
+    public EventFullDto findPublicBy(Long eventId, HttpServletRequest request) {
+        log.debug("Метод findPublicBy() (return DTO); eventId={}", eventId);
 
         Event event = eventRepository.findByIdAndState(eventId, EventState.PUBLISHED)
                 .orElseThrow(() -> new NotFoundException("Опубликованного Event id={} нет", eventId));
@@ -397,8 +405,8 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventFullDto> getPublicBy(UserEventSearchParams params, HttpServletRequest request) {
-        log.debug("Метод publicSearchMany; {}", params);
+    public List<EventFullDto> findPublicBy(UserEventSearchParams params, HttpServletRequest request) {
+        log.debug("Метод findPublicBy() (return List<DTO>); {}", params);
 
         QEvent event = QEvent.event;
         List<BooleanExpression> conditions = new ArrayList<>();

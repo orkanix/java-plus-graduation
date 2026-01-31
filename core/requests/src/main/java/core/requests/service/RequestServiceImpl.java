@@ -34,14 +34,11 @@ public class RequestServiceImpl implements RequestService {
     @Override
     @Transactional
     public ParticipationRequestDto create(Long userId, Long eventId) {
-        log.debug("Метод createRequest(); userId={}, eventId={}", userId, eventId);
+        log.debug("Метод createRequest(); userId: {}, eventId: {}", userId, eventId);
 
         UserShortDto user = userClient.findUserById(userId);
         EventFullDto event = eventClient.findByIdFull(eventId);
 
-        log.info(user.toString());
-        log.info(event.toString());
-        log.info(eventClient.findById(event.getId()).toString());
         if (eventClient.findById(event.getId()).getInitiator().getId().equals(user.getId())) {
             throw new ConflictException("Нельзя участвовать в собственном событии");
         }
@@ -81,8 +78,8 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public List<ParticipationRequestDto> getAllBy(Long userId) {
-        log.debug("Метод getAllBy(); userId={}", userId);
+    public List<ParticipationRequestDto> findAllById(Long userId) {
+        log.debug("Метод findAllById(); userId: {}", userId);
 
         List<Request> result = requestRepository.findAllByRequester(userId);
 
@@ -94,10 +91,10 @@ public class RequestServiceImpl implements RequestService {
     @Override
     @Transactional
     public ParticipationRequestDto cancel(Long userId, Long requestId) {
-        log.debug("Метод cancel(); userId={}, requestId={}", userId, requestId);
+        log.debug("Метод cancel(); userId: {}, requestId: {}", userId, requestId);
 
         userClient.findUserById(userId);
-        Request request = this.findRequestBy(requestId);
+        Request request = this.findRequestById(requestId);
         request.setStatus(RequestStatus.CANCELED);
 
         if (!request.getRequester().equals(userId)) {
@@ -110,16 +107,22 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<ParticipationRequestDto> findAllByEvent(Long eventId) {
+        log.debug("Метод findAllByEvent(); eventId: {}", eventId);
+
         return requestRepository.findAllByEvent(eventId).stream().map(requestMapper::toDto).toList();
     }
 
     @Override
     public List<ParticipationRequestDto> findAllByIdIn(Set<Long> requestIds) {
+        log.debug("Метод findAllByIdIn(); requestIds: {}", requestIds);
+
         return requestRepository.findAllByIdIn(requestIds).stream().map(requestMapper::toDto).toList();
     }
 
     @Override
     public List<ParticipationRequestDto> updateStatuses(List<ParticipationRequestDto> requests, RequestStatus status) {
+        log.debug("Метод updateStatuses(); requests: {}, status: {}", requests, status);
+
         List<ParticipationRequestDto> updatedRequests = requests.stream()
                 .peek(request -> request.setStatus(status))
                 .toList();
@@ -135,7 +138,9 @@ public class RequestServiceImpl implements RequestService {
                 .toList();
     }
 
-    private Request findRequestBy(Long requestId) {
+    private Request findRequestById(Long requestId) {
+        log.debug("Метод findRequestById(); requestId: {}", requestId);
+
         return requestRepository.findById(requestId)
                 .orElseThrow(() -> new NotFoundException("Request id={} не найден", requestId));
     }

@@ -79,8 +79,8 @@ public class CompilationServiceImpl implements CompilationService {
 
     // Public API:
     @Override
-    public List<CompilationDto> getAllBy(Boolean pinned, Integer from, Integer size) {
-        log.debug("Метод getAllBy(); pinned={}, from={}, size={}", pinned, from, size);
+    public List<CompilationDto> findAllById(Boolean pinned, Integer from, Integer size) {
+        log.debug("Метод findAllById(); pinned={}, from={}, size={}", pinned, from, size);
 
         int page = from / size;
         Pageable pageable = PageRequest.of(page, size);
@@ -94,8 +94,8 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
-    public CompilationDto getBy(Long compId) {
-        log.debug("Метод getBy(); compId={}", compId);
+    public CompilationDto findById(Long compId) {
+        log.debug("Метод findById(); compId={}", compId);
 
         Compilation compilation = this.findCompilationBy(compId);
 
@@ -106,10 +106,14 @@ public class CompilationServiceImpl implements CompilationService {
 
 
     private Compilation findCompilationBy(Long compId) {
+        log.debug("Метод findCompilationBy(); compId: {}", compId);
+
         return compilationRepository.findById(compId).orElseThrow(() -> new NotFoundException("Подборка не найдена"));
     }
 
     private List<EventShortDto> findEventsBy(Set<Long> eventsIds) {
+        log.debug("Метод findEventsBy(); eventsIds: {}", eventsIds);
+
         List<EventShortDto> events = eventClient.findAllById(eventsIds);
 
         if (events.size() != eventsIds.size()) {

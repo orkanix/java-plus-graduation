@@ -15,9 +15,9 @@ public interface CategoryService {
     void delete(Long categoryId);
 
     // Public API:
-    CategoryDto getById(Long categoryId);
+    CategoryDto findById(Long categoryId);
 
-    List<CategoryDto> getAll(int from, int size);
+    List<CategoryDto> findAllById(int from, int size);
 
-    List<CategoryDto> getCategoriesByIds(List<Long> categoryIds);
+    List<CategoryDto> findCategoriesByIds(List<Long> categoryIds);
 }

@@ -19,6 +19,7 @@ public class NewEventDto {
     @Size(min = 20, max = 2000)
     private String annotation;
 
+    @NotNull
     private Long category;
 
     @NotBlank
@@ -36,9 +37,11 @@ public class NewEventDto {
     private Boolean paid;
 
     @PositiveOrZero
-    private Integer participantLimit;
+    @Builder.Default
+    private Integer participantLimit = 0;
 
-    private Boolean requestModeration;
+    @Builder.Default
+    private Boolean requestModeration = true;
 
     @NotBlank
     @Size(min = 3, max = 120)

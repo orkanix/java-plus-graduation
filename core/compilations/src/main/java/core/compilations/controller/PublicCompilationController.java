@@ -21,18 +21,16 @@ public class PublicCompilationController {
     private final CompilationService compilationService;
 
     @GetMapping
-    public List<CompilationDto> getCompilations(
-            @RequestParam(required = false) Boolean pinned,
-            @RequestParam(defaultValue = "0", required = false) @PositiveOrZero Integer from,
-            @RequestParam(defaultValue = "10", required = false) @Positive Integer size
-    ) {
+    public List<CompilationDto> getCompilations(@RequestParam(required = false) Boolean pinned,
+                                                @RequestParam(defaultValue = "0", required = false) @PositiveOrZero Integer from,
+                                                @RequestParam(defaultValue = "10", required = false) @Positive Integer size) {
         log.debug("Метод getCompilations(); pinned={}, from={}, size={}", pinned, from, size);
-        return compilationService.getAllBy(pinned, from, size);
+        return compilationService.findAllById(pinned, from, size);
     }
 
     @GetMapping("/{compId}")
-    public CompilationDto getCompilationById(@PathVariable Long compId) {
+    public CompilationDto getCompilationById(@PathVariable @Positive Long compId) {
         log.debug("Метод getCompilationById(); id={}", compId);
-        return compilationService.getBy(compId);
+        return compilationService.findById(compId);
     }
 }

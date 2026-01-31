@@ -21,20 +21,20 @@ public class PrivateRequestController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ParticipationRequestDto createRequest(@PathVariable @Positive Long userId,
-                                                                 @RequestParam @Positive Long eventId) {
+                                                 @RequestParam @Positive Long eventId) {
         log.debug("Метод createRequest(); userId={}, eventId={}", userId, eventId);
         return requestService.create(userId, eventId);
     }
 
     @GetMapping
-    public List<ParticipationRequestDto> getRequests(@PathVariable @Positive Long userId) {
+    public List<ParticipationRequestDto> getRequests(@PathVariable@Positive Long userId) {
         log.debug("Метод getRequests(); userId={}", userId);
-        return requestService.getAllBy(userId);
+        return requestService.findAllById(userId);
     }
 
     @PatchMapping("{requestId}/cancel")
     public ParticipationRequestDto cancelRequest(@PathVariable @Positive Long userId,
-                                                                 @PathVariable @Positive Long requestId) {
+                                                 @PathVariable @Positive Long requestId) {
         log.debug("Метод cancelRequest(); userId={}, requestId={}", userId, requestId);
         return requestService.cancel(userId, requestId);
     }

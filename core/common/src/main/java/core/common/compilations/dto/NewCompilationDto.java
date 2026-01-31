@@ -2,10 +2,11 @@ package core.common.compilations.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.Length;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -13,14 +14,17 @@ import java.util.Set;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class NewCompilationDto {
 
+    @Builder.Default
     private Set<Long> events = new HashSet<>();
 
     @NotNull
+    @Builder.Default
     private Boolean pinned = false;
 
     @NotBlank
-    @Length(max = 50)
+    @Size(max = 50)
     private String title;
 }

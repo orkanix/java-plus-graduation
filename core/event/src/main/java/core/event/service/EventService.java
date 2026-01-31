@@ -12,9 +12,9 @@ public interface EventService {
     // Private API:
     EventFullDto create(Long userId, NewEventDto newEventDto);
 
-    EventFullDto getByUser(Long userId, Long eventId);
+    EventFullDto findByUser(Long userId, Long eventId);
 
-    List<EventShortDto> getAllByUser(Long userId, int from, int size);
+    List<EventShortDto> findAllByUser(Long userId, int from, int size);
 
     EventFullDto updateByUser(Long userId, Long eventId, UpdEventUserRequest updEventUserRequest);
 
@@ -24,11 +24,11 @@ public interface EventService {
     List<EventFullDto> searchForAdmin(AdminEventSearchParams params);
 
     // Public API:
-    EventFullDto getPublicBy(Long eventId, HttpServletRequest request);
+    EventFullDto findPublicBy(Long eventId, HttpServletRequest request);
 
-    List<EventFullDto> getPublicBy(UserEventSearchParams params, HttpServletRequest request);
+    List<EventFullDto> findPublicBy(UserEventSearchParams params, HttpServletRequest request);
 
-    List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId);
+    List<ParticipationRequestDto> findEventRequests(Long userId, Long eventId);
 
     UpdRequestsStatusResult updateRequests(Long userId, Long eventId, EventRequestStatusUpdateRequest updDto);
 

@@ -24,40 +24,40 @@ public class PublicEventController {
 
     @GetMapping("/{eventId}")
     public EventFullDto publicSearchOne(@PathVariable @Positive Long eventId,
-                                                        HttpServletRequest request) {
+                                        HttpServletRequest request) {
         log.debug("Метод publicSearchOne(); eventId={}", eventId);
-        return eventService.getPublicBy(eventId, request);
+        return eventService.findPublicBy(eventId, request);
     }
 
     @GetMapping
-    public List<EventFullDto> publicSearchMany(@Valid @ModelAttribute UserEventSearchParams params,
-                                                               HttpServletRequest request) {
+    public List<EventFullDto> publicSearchMany(@ModelAttribute @Valid UserEventSearchParams params,
+                                               HttpServletRequest request) {
         log.debug("Метод publicSearchMany(); {}", params);
-        return eventService.getPublicBy(params, request);
+        return eventService.findPublicBy(params, request);
     }
 
     @GetMapping("/{categoryId}/exist")
-    public boolean existsByCategoryId(@PathVariable Long categoryId) {
+    public boolean existsByCategoryId(@PathVariable @Positive Long categoryId) {
         return eventService.existsByCategoryId(categoryId);
     }
 
     @GetMapping("/findAllById")
-    public List<EventShortDto> findAllById(@RequestParam Set<Long> eventId) {
+    public List<EventShortDto> findAllById(@RequestParam Set<@Positive Long> eventId) {
         return eventService.findAllById(eventId);
     }
 
     @GetMapping("/{eventId}/findById")
-    public EventShortDto findById(@PathVariable Long eventId) {
+    public EventShortDto findById(@PathVariable @Positive Long eventId) {
         return eventService.findById(eventId);
     }
 
     @GetMapping("/{eventId}/findByIdFull")
-    public EventFullDto findByIdFull(@PathVariable Long eventId) {
+    public EventFullDto findByIdFull(@PathVariable @Positive Long eventId) {
         return eventService.findByIdFull(eventId);
     }
 
     @PutMapping("/setConfirmedRequests")
-    public EventFullDto setConfirmedRequests(@RequestBody EventFullDto event) {
+    public EventFullDto setConfirmedRequests(@RequestBody @Valid EventFullDto event) {
         return eventService.setConfirmedRequests(event);
     }
 }

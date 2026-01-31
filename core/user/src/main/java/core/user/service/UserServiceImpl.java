@@ -29,10 +29,10 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto add(NewUserRequest newDto) {
-        log.debug("Метод add(); userInputDto={}", newDto);
+        log.debug("Метод add(); userInputDto=: {}", newDto);
 
         if (userRepository.existsByEmail(newDto.getEmail())) {
-            throw new ConflictException("User с Email={} уже существует", newDto.getEmail());
+            throw new ConflictException("User с Email: {} уже существует", newDto.getEmail());
         }
 
         String localpart = newDto.getEmail().substring(0, newDto.getEmail().indexOf('@'));
@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> findAllBy(List<Long> ids, Integer from, Integer size) {
-        log.debug("Метод findAll(); ids={}, from={}, size={}", ids, from, size);
+        log.debug("Метод findAll(); ids: {}, from: {}, size: {}", ids, from, size);
 
         int page = from / size;
         Pageable pageable = PageRequest.of(page, size);
@@ -68,25 +68,29 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void delete(Long userId) {
-        log.debug("Сервис UserServiceImpl; Метод delete(); userId={}", userId);
+        log.debug("Метод delete(); userId: {}", userId);
 
         if (userRepository.existsById(userId)) {
             userRepository.deleteById(userId);
         } else {
-            throw new NotFoundException("User userId={} не найден", userId);
+            throw new NotFoundException("User c id: " + userId + " не найден!");
         }
     }
 
     @Override
     public UserShortDto findUserById(Long userId) {
+        log.debug("Метод findUserById(); userId: {}", userId);
+
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id::" + userId + " не найден!"));
+                .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден!"));
 
         return userMapper.toShortDto(user);
     }
 
     @Override
     public List<UserShortDto> getUsersByIds(List<Long> usersIds) {
+        log.debug("Метод getUsersByIds(); usersIds: {}", usersIds);
+
         return userRepository.findAllById(usersIds).stream()
                 .map(userMapper::toShortDto)
                 .toList();

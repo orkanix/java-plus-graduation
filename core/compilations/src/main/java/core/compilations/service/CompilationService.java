@@ -18,7 +18,7 @@ public interface CompilationService {
     void delete(Long compId);
 
     // Public API:
-    CompilationDto getBy(Long compId);
+    CompilationDto findById(Long compId);
 
-    List<CompilationDto> getAllBy(Boolean pinned, Integer from, Integer size);
+    List<CompilationDto> findAllById(Boolean pinned, Integer from, Integer size);
 }

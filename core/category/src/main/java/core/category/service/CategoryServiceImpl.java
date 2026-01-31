@@ -74,8 +74,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     // Public API:
     @Override
-    public CategoryDto getById(Long categoryId) {
-        log.debug("Метод getById(); categoryId: {}", categoryId);
+    public CategoryDto findById(Long categoryId) {
+        log.debug("Метод findById(); categoryId: {}", categoryId);
 
         Category category = this.findCategoryById(categoryId);
 
@@ -83,8 +83,8 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryDto> getAll(int from, int size) {
-        log.debug("Метод getAll(); from: {}, size: {}", from, size);
+    public List<CategoryDto> findAllById(int from, int size) {
+        log.debug("Метод findAllById(); from: {}, size: {}", from, size);
 
         int page = from / size;
         Pageable pageable = PageRequest.of(page, size);
@@ -97,7 +97,9 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryDto> getCategoriesByIds(List<Long> categoryIds) {
+    public List<CategoryDto> findCategoriesByIds(List<Long> categoryIds) {
+        log.debug("Метод findCategoriesByIds(); categoryIds: {}", categoryIds);
+
         return categoryRepository.findAllById(categoryIds).stream()
                 .map(categoryMapper::toDto)
                 .toList();

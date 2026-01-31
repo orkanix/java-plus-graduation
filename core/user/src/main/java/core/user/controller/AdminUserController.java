@@ -25,7 +25,7 @@ public class AdminUserController {
     private final UserService userService;
 
     @GetMapping
-    public List<UserDto> findAll(@RequestParam(required = false) List<Long> ids,
+    public List<UserDto> findAll(@RequestParam(required = false) List<@Positive Long> ids,
                                  @RequestParam(defaultValue = "0", required = false) @PositiveOrZero Integer from,
                                  @RequestParam(defaultValue = "10", required = false) @Positive Integer size) {
         log.debug("Метод findAll(); ids={}, from={}, size={}", ids, from, size);

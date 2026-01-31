@@ -22,18 +22,18 @@ public class PublicCategoryController {
 
     @GetMapping
     public List<CategoryDto> getCategories(@RequestParam(defaultValue = "0") @PositiveOrZero int from,
-                                                           @RequestParam(defaultValue = "10") @Positive int size) {
+                                           @RequestParam(defaultValue = "10") @Positive int size) {
         log.debug("Метод getCategories(); from={}, size={}", from, size);
-        return categoryService.getAll(from, size);
+        return categoryService.findAllById(from, size);
     }
 
     @GetMapping("/{catId}")
-    public CategoryDto getCategory(@PathVariable Long catId) {
-        return categoryService.getById(catId);
+    public CategoryDto getCategory(@PathVariable @Positive Long catId) {
+        return categoryService.findById(catId);
     }
 
     @PostMapping("/getIds")
     public List<CategoryDto> getCategoriesByIds(@RequestBody List<Long> categoryIds) {
-        return categoryService.getCategoriesByIds(categoryIds);
+        return categoryService.findCategoriesByIds(categoryIds);
     }
 }

@@ -2,8 +2,6 @@ package core.requests.service;
 
 import core.common.requests.dto.ParticipationRequestDto;
 import core.common.requests.dto.RequestStatus;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.Set;
@@ -12,7 +10,7 @@ public interface RequestService {
 
     ParticipationRequestDto create(Long userId, Long eventId);
 
-    List<ParticipationRequestDto> getAllBy(Long userId);
+    List<ParticipationRequestDto> findAllById(Long userId);
 
     ParticipationRequestDto cancel(Long userId, Long requestId);
 

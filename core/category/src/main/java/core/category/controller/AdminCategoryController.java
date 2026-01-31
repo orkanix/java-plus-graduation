@@ -3,6 +3,7 @@ package core.category.controller;
 import core.common.category.dto.CategoryDto;
 import core.common.category.dto.CategoryRequestDto;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -21,21 +22,21 @@ public class AdminCategoryController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CategoryDto addCategory(@Valid @RequestBody CategoryRequestDto newDto) {
+    public CategoryDto addCategory(@RequestBody @Valid CategoryRequestDto newDto) {
         log.debug("Метод addCategory(); categoryParamDto={}", newDto);
         return categoryService.add(newDto);
     }
 
     @DeleteMapping("/{catId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCategory(@PathVariable Long catId) {
+    public void deleteCategory(@PathVariable @Positive Long catId) {
         log.debug("Метод deleteCategory(); catId={}", catId);
         categoryService.delete(catId);
     }
 
     @PatchMapping("/{catId}")
-    public CategoryDto updateCategory(@PathVariable Long catId,
-                                                      @Valid @RequestBody CategoryRequestDto updDto) {
+    public CategoryDto updateCategory(@PathVariable @Positive Long catId,
+                                      @RequestBody @Valid CategoryRequestDto updDto) {
         log.debug("Метод updateCategory(); categoryParamDto={}", updDto);
         return categoryService.update(catId, updDto);
     }

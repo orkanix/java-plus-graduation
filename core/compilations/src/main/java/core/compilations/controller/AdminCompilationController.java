@@ -4,6 +4,7 @@ import core.common.compilations.dto.CompilationDto;
 import core.common.compilations.dto.NewCompilationDto;
 import core.common.compilations.dto.UpdateCompilationDto;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -22,21 +23,21 @@ public class AdminCompilationController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CompilationDto createCompilation(@Valid @RequestBody NewCompilationDto newDto) {
+    public CompilationDto createCompilation(@RequestBody @Valid NewCompilationDto newDto) {
         log.debug("Метод createCompilation(); dto={}", newDto);
         return compilationService.create(newDto);
     }
 
     @DeleteMapping("/{compId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCompilation(@PathVariable Long compId) {
+    public void deleteCompilation(@PathVariable @Positive Long compId) {
         log.debug("Метод deleteCompilation(); compId={}", compId);
         compilationService.delete(compId);
     }
 
     @PatchMapping("/{compId}")
-    public CompilationDto updateCompilation(@PathVariable Long compId,
-                                                            @Valid @RequestBody UpdateCompilationDto updDto) {
+    public CompilationDto updateCompilation(@PathVariable @Positive Long compId,
+                                            @RequestBody @Valid UpdateCompilationDto updDto) {
         log.debug("Метод updateCompilation(); compId={}, updDto={}", compId, updDto);
         return compilationService.update(compId, updDto);
     }
