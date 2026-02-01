@@ -1,9 +1,6 @@
 server:
   port: 0
 
-statsServer:
-  id: stats-server
-
 spring:
   datasource:
     url: jdbc:postgresql://localhost:4432/main

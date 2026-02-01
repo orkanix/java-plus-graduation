@@ -8,8 +8,6 @@ import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.stereotype.Repository;
 import core.event.model.Event;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -20,8 +18,6 @@ public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPre
     Optional<Event> findByIdAndInitiator(Long eventId, Long userId);
 
     Optional<Event> findByIdAndState(Long eventId, EventState state);
-
-    List<Event> findEventsByIdIn(Collection<Long> ids);
 
     boolean existsByCategory(Long categoryId);
 
