@@ -1,47 +1,65 @@
 package ru.practicum.ewm.comment.mapper;
 
-import org.mapstruct.*;
-import ru.practicum.ewm.category.mapper.CategoryMapper;
+import org.springframework.stereotype.Component;
 import ru.practicum.ewm.comment.dto.CommentFullDto;
 import ru.practicum.ewm.comment.dto.CommentPublicDto;
 import ru.practicum.ewm.comment.dto.NewCommentDto;
 import ru.practicum.ewm.comment.dto.UpdCommentDto;
 import ru.practicum.ewm.comment.model.Comment;
-import ru.practicum.ewm.user.mapper.UserMapper;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
-@Mapper(componentModel = "spring", uses = {CategoryMapper.class, UserMapper.class})
-public interface CommentMapper {
+@Component
+public class CommentMapper {
+    public Comment toEntity(NewCommentDto dto) {
+        if (dto == null) return null;
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "author", ignore = true)
-    @Mapping(target = "event", ignore = true)
-    @Mapping(target = "publishedOn", ignore = true)
-    @Mapping(target = "state", ignore = true)
-    Comment toEntity(NewCommentDto newDto);
+        return Comment.builder()
+                .annotation(dto.getAnnotation())
+                .text(dto.getText())
+                .build();
+    }
 
-    @Mapping(target = "authorId", source = "author.id")
-    @Mapping(target = "eventId", source = "event.id")
-    @Mapping(target = "publishedOn", expression = "java(toLocalDateTime(comment.getPublishedOn()))")
-    CommentFullDto toFullDto(Comment comment);
+    public CommentFullDto toFullDto(Comment comment) {
+        if (comment == null) return null;
 
-    @Mapping(target = "authorName", source = "author.name")
-    @Mapping(target = "eventTitle", source = "event.title")
-    @Mapping(target = "publishedOn", expression = "java(toLocalDateTime(comment.getPublishedOn()))")
-    CommentPublicDto toPublicDto(Comment comment);
+        return CommentFullDto.builder()
+                .id(comment.getId())
+                .authorId(comment.getAuthor())
+                .eventId(comment.getEvent())
+                .annotation(comment.getAnnotation())
+                .text(comment.getText())
+                .publishedOn(toLocalDateTime(comment.getPublishedOn()))
+                .state(comment.getState())
+                .build();
+    }
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "author", ignore = true)
-    @Mapping(target = "event", ignore = true)
-    @Mapping(target = "publishedOn", ignore = true)
-    @Mapping(target = "state", ignore = true)
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateFromDto(UpdCommentDto updDto, @MappingTarget Comment comment);
+    public CommentPublicDto toPublicDto(Comment comment) {
+        if (comment == null) return null;
 
-    default LocalDateTime toLocalDateTime(Instant instant) {
+        return CommentPublicDto.builder()
+                .authorName(comment.getAuthor().toString())
+                .eventTitle(comment.getEvent().toString())
+                .annotation(comment.getAnnotation())
+                .text(comment.getText())
+                .publishedOn(toLocalDateTime(comment.getPublishedOn()))
+                .build();
+    }
+
+    public void updateFromDto(UpdCommentDto dto, Comment comment) {
+        if (dto == null || comment == null) return;
+
+        if (dto.getAnnotation() != null) {
+            comment.setAnnotation(dto.getAnnotation());
+        }
+        if (dto.getText() != null) {
+            comment.setText(dto.getText());
+        }
+    }
+
+    public LocalDateTime toLocalDateTime(Instant instant) {
         return instant != null ? LocalDateTime.ofInstant(instant, ZoneOffset.UTC) : null;
     }
 }

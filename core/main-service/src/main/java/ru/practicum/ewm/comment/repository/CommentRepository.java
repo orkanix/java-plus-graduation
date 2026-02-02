@@ -9,11 +9,11 @@ import java.util.List;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
-    List<Comment> findAllByEventIdAndAuthorId(Long eventId, Long userId);
+    List<Comment> findAllByEventAndAuthor(Long eventId, Long userId);
 
-    List<Comment> findByEventId(Long eventId);
+    List<Comment> findByEvent(Long eventId);
 
-    boolean existsByIdAndEventId(Long id, Long eventId);
+    boolean existsByIdAndEvent(Long id, Long eventId);
 
-    boolean existsByIdAndAuthorId(Long commentId, Long authorId);
+    boolean existsByIdAndAuthor(Long commentId, Long authorId);
 }

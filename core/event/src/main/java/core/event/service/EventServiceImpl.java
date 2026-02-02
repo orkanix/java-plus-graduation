@@ -1,0 +1,518 @@
+package core.event.service;
+
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import core.common.category.client.CategoryClient;
+import core.common.category.dto.CategoryDto;
+import core.common.event.dto.*;
+import core.common.requests.client.RequestsClient;
+import core.common.requests.dto.ParticipationRequestDto;
+import core.common.requests.dto.RequestStatus;
+import core.common.user.client.UserClient;
+import core.common.user.dto.UserShortDto;
+import core.event.model.QEvent;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.ewm.ReqStatsParams;
+import ru.practicum.ewm.StatsDto;
+import core.event.mapper.EventMapper;
+import core.event.model.Event;
+import core.event.repository.EventRepository;
+import core.common.exception.ConflictException;
+import core.common.exception.NotFoundException;
+import ru.practicum.ewm.client.StatsClient;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import static core.common.event.dto.EventState.CANCELED;
+import static java.time.ZoneOffset.UTC;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class EventServiceImpl implements EventService {
+
+    private final UserClient userClient;
+    private final EventRepository eventRepository;
+    private final RequestsClient requestsClient;
+    private final CategoryClient categoryClient;
+
+    private final EventMapper eventMapper;
+
+    private final StatsClient statsClient;
+
+    // Private API:
+    @Override
+    @Transactional
+    public EventFullDto create(Long userId, final NewEventDto newDto) {
+        log.debug("Метод create(); userId={}, newDto={}", userId, newDto);
+
+        this.checkStartDate(newDto.getEventDate());
+        UserShortDto user = userClient.findUserById(userId);
+        CategoryDto category = categoryClient.getCategory(newDto.getCategory());
+
+        Event event = eventMapper.toEntity(newDto, user.getId());
+        event.setInitiator(user.getId());
+        event.setCategory(category.getId());
+        event = eventRepository.save(event);
+
+        log.debug("Создан event={}", event);
+
+        return eventMapper.toFullDto(event, category, user);
+    }
+
+    @Override
+    public List<EventShortDto> findAllByUser(Long userId, int from, int size) {
+        log.debug("Метод findAllByUser(); userId={}", userId);
+
+        int page = from / size;
+        Pageable pageable = PageRequest.of(page, size, Sort.by("eventDate").descending());
+        Page<Event> events = eventRepository.findAllByInitiator(userId, pageable);
+
+        return events.map(event -> {
+            UserShortDto user = userClient.findUserById(event.getInitiator());
+            CategoryDto category = categoryClient.getCategory(event.getCategory());
+
+            return eventMapper.toShortDto(event, category, user);
+        }).getContent();
+    }
+
+    @Override
+    public EventFullDto findByUser(Long userId, Long eventId) {
+        log.debug("Метод findByUser(); eventId={}, userId={}", eventId, userId);
+
+        Event event = eventRepository.findByIdAndInitiator(eventId, userId)
+                .orElseThrow(() -> new NotFoundException("Event id={} у user id={} не найдено", eventId, userId));
+
+        UserShortDto user = userClient.findUserById(event.getInitiator());
+        CategoryDto category = categoryClient.getCategory(event.getCategory());
+
+        return eventMapper.toFullDto(event, category, user);
+    }
+
+    @Override
+    @Transactional
+    public EventFullDto updateByUser(Long userId, Long eventId, UpdEventUserRequest updDto) {
+        log.debug("Метод userUpdate(); userId={}, eventId: {}, dto={}",
+                userId, eventId, updDto);
+
+        this.checkEventDateForUpdate(updDto);
+
+        Event event = eventRepository.findByIdAndInitiator(eventId, userId)
+                .orElseThrow(() -> new NotFoundException("Event id={} не найдено; User id={} ", eventId, userId));
+
+        if (event.getState().equals(EventState.PUBLISHED)) {
+            throw new ConflictException("Event id={} нельзя изменить; его status={}", eventId, event.getState());
+        }
+
+        log.debug("Найден Event в репозитории; event={}", event);
+
+        if (!(event.getState().equals(CANCELED) || event.getState().equals(EventState.PENDING))) {
+            throw new ConflictException("Event id={} нельзя обновить пока оно опубликовано", eventId);
+        }
+        if (updDto.getCategory() != null) {
+            event.setCategory(categoryClient.getCategory(updDto.getCategory()).getId());
+        }
+
+        if (updDto.getStateAction() != null) {
+            switch (updDto.getStateAction()) {
+                case SEND_TO_REVIEW -> event.setState(EventState.PENDING);
+                case CANCEL_REVIEW -> event.setState(CANCELED);
+            }
+        }
+
+        eventMapper.updateFromDto(updDto, event);
+        event = eventRepository.save(event);
+
+        log.debug("Метод userUpdate(); Event обновлен в репозитории event={}", event);
+
+        UserShortDto user = userClient.findUserById(event.getInitiator());
+        CategoryDto category = categoryClient.getCategory(event.getCategory());
+
+        return eventMapper.toFullDto(event, category, user);
+    }
+
+    @Override
+    public List<ParticipationRequestDto> findEventRequests(Long userId, Long eventId) {
+        log.debug("Метод findEventRequests(); userId={}, eventId={}", userId, eventId);
+
+        return requestsClient.findAllByEvent(eventId);
+    }
+
+    @Override
+    @Transactional
+    public UpdRequestsStatusResult updateRequests(Long userId, Long eventId, EventRequestStatusUpdateRequest updDto) {
+        log.debug("Метод updateRequests(), userId={}, eventId={}", userId, eventId);
+
+        Event event = this.findEventBy(eventId);
+        List<ParticipationRequestDto> requests = requestsClient.findAllByIdIn(updDto.getRequestIds());
+
+        if (requests.isEmpty()) {
+            return UpdRequestsStatusResult.builder()
+                    .confirmedRequests(List.of())
+                    .rejectedRequests(List.of())
+                    .build();
+        }
+
+        UpdRequestsStatusResult result;
+
+        switch (updDto.getStatus()) {
+            case UpdRequestStatus.CONFIRMED -> {
+                if (event.getConfirmedRequests() == event.getParticipantLimit().longValue()) {
+                    throw new ConflictException("На Event id={} больше нет мест", eventId);
+                }
+
+                int availableSlots = event.getParticipantLimit() == 0
+                        ? requests.size()
+                        : event.getParticipantLimit().intValue() - event.getConfirmedRequests().intValue();
+
+                List<ParticipationRequestDto> toConfirm = requests.size() <= availableSlots
+                        ? requests
+                        : requests.subList(0, availableSlots);
+
+                List<ParticipationRequestDto> toReject = requests.size() <= availableSlots
+                        ? List.of()
+                        : requests.subList(availableSlots, requests.size());
+
+                List<ParticipationRequestDto> confirmedDtos = requestsClient.updateStatuses(toConfirm, RequestStatus.CONFIRMED);
+                List<ParticipationRequestDto> rejectedDtos = requestsClient.updateStatuses(toReject, RequestStatus.REJECTED);
+
+                // Обновляем количество подтверждённых
+                event.setConfirmedRequests(event.getConfirmedRequests() + confirmedDtos.size());
+                eventRepository.save(event);
+
+                result = UpdRequestsStatusResult.builder()
+                        .confirmedRequests(confirmedDtos)
+                        .rejectedRequests(rejectedDtos)
+                        .build();
+            }
+
+            case UpdRequestStatus.REJECTED -> {
+                List<ParticipationRequestDto> rejectedDtos = requests.stream()
+                        .peek(r -> {
+                            if (r.getStatus() == RequestStatus.CONFIRMED) {
+                                throw new ConflictException("Нельзя отклонить подтвержденный Request");
+                            }
+                            r.setStatus(RequestStatus.REJECTED);
+                        })
+                        .toList();
+
+                List<ParticipationRequestDto> updatedDtos =
+                        requestsClient.updateStatuses(rejectedDtos, RequestStatus.REJECTED);
+
+                result = UpdRequestsStatusResult.builder()
+                        .confirmedRequests(List.of())
+                        .rejectedRequests(updatedDtos)
+                        .build();
+            }
+
+            default -> throw new IllegalArgumentException("Неизвестный статус: " + updDto.getStatus());
+        }
+
+        return result;
+    }
+
+    @Override
+    public boolean existsByCategoryId(Long categoryId) {
+        return eventRepository.existsByCategory(categoryId);
+    }
+
+    @Override
+    public List<EventShortDto> findAllById(Set<Long> eventId) {
+        log.debug("Метод existsByIdAndInitiator(); eventId: {}", eventId);
+
+        List<Event> events = eventRepository.findAllById(eventId);
+
+        List<CategoryDto> categories = categoryClient.getCategoriesByIds(events.stream().map(Event::getCategory).toList());
+        List<UserShortDto> users = userClient.getUsersByIds(events.stream().map(Event::getInitiator).toList());
+
+        return events.stream().map(event -> {
+            CategoryDto category = categories.stream().filter(categoryDto -> categoryDto.getId().equals(event.getCategory())).findFirst()
+                    .orElseThrow(() -> new NotFoundException("Категория для event c id " + event.getId() + " не найдена!"));
+
+            UserShortDto user = users.stream().filter(userShortDto -> userShortDto.getId().equals(event.getInitiator())).findFirst()
+                    .orElseThrow(() -> new NotFoundException("Пользователь для event c id " + event.getId() + " не найден!"));
+
+            return eventMapper.toShortDto(event, category, user);
+        }).toList();
+    }
+
+    @Override
+    public boolean existsByIdAndInitiator(Long userId, Long eventId) {
+        log.debug("Метод existsByIdAndInitiator(); userId: {}, eventId: {}", userId, eventId);
+
+        return eventRepository.existsByIdAndInitiator(eventId, userId);
+    }
+
+    @Override
+    public EventShortDto findById(Long eventId) {
+        log.debug("Метод findById(); eventId: {}", eventId);
+
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event id={}, не найден", eventId));
+        CategoryDto category = categoryClient.getCategory(event.getCategory());
+        UserShortDto user = userClient.findUserById(event.getInitiator());
+
+        return eventMapper.toShortDto(event, category, user);
+    }
+
+    @Override
+    public EventFullDto findByIdFull(Long eventId) {
+        log.debug("Метод findByIdFull(); eventId: {}", eventId);
+
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event id={}, не найден", eventId));
+        CategoryDto category = categoryClient.getCategory(event.getCategory());
+        UserShortDto user = userClient.findUserById(event.getInitiator());
+
+        return eventMapper.toFullDto(event, category, user);
+    }
+
+    @Override
+    public EventFullDto setConfirmedRequests(EventFullDto event) {
+        log.debug("Метод setConfirmedRequests(); event: {}", event);
+
+        CategoryDto category = categoryClient.getCategory(event.getCategory().getId());
+        UserShortDto user = userClient.findUserById(event.getInitiator().getId());
+
+        return eventMapper.toFullDto(eventRepository.save(eventMapper.toEntity(event)), category, user);
+    }
+
+    // Admin API:
+    @Override
+    @Transactional
+    public EventFullDto updateByAdmin(Long eventId, UpdEventAdminRequest updDto) {
+        log.debug("Метод adminUpdateEvent(); eventId: {}, dto={}", eventId, updDto);
+
+        Event event = this.findEventBy(eventId);
+
+        eventMapper.updateFromDto(updDto, event);
+
+        this.checkEventDateForPublish(updDto.getEventDate());
+
+        if (updDto.getStateAction() != null) {
+            switch (updDto.getStateAction()) {
+                case PUBLISH_EVENT -> {
+                    if (event.getState().equals(EventState.PENDING)) {
+                        event.setState(EventState.PUBLISHED);
+                        event.setPublishedOn(Instant.now());
+                    } else if (event.getState().equals(CANCELED) ||
+                            event.getState().equals(EventState.PUBLISHED)) {
+                        throw new ConflictException("Event id={} нельзя опубликовать; его status={}",
+                                eventId, event.getState());
+                    }
+
+                    log.debug("Для Event назначен статус={}, время публикации publishedOn={}",
+                            event.getState(), event.getPublishedOn());
+                }
+                case REJECT_EVENT -> {
+                    if (event.getState().equals(EventState.PENDING)) {
+                        event.setState(CANCELED);
+                    } else if (event.getState().equals(EventState.PUBLISHED)) {
+                        throw new ConflictException("Опубликованные Event не могут быть отклонены");
+                    }
+
+                    log.debug("Для Event назначен статус={}", event.getState());
+                }
+            }
+        }
+
+        event = eventRepository.save(event);
+
+        log.debug("Метод adminUpdate(); Event обновлен в репозитории event={}", event);
+
+        UserShortDto user = userClient.findUserById(event.getInitiator());
+        CategoryDto category = categoryClient.getCategory(event.getCategory());
+
+        return eventMapper.toFullDto(event, category, user);
+    }
+
+    @Override
+    public List<EventFullDto> searchForAdmin(AdminEventSearchParams params) {
+        log.debug("Метод adminSearchEvents; {}", params);
+
+        QEvent event = QEvent.event;
+        List<BooleanExpression> conditions = new ArrayList<>();
+
+        if (params.getUsers() != null && !params.getUsers().isEmpty()) {
+            conditions.add(event.initiator.in(params.getUsers()));
+        }
+
+        if (params.getCategories() != null && !params.getCategories().isEmpty()) {
+            conditions.add(event.category.in(params.getCategories()));
+        }
+
+        if (params.getStates() != null && !params.getStates().isEmpty()) {
+            conditions.add(event.state.in(params.getStates()));
+        }
+
+        if (params.getRangeStart() != null) {
+            Instant rangeStart = params.getRangeStart().atZone(UTC).toInstant();
+            conditions.add(event.eventDate.after(rangeStart));
+        }
+
+        if (params.getRangeEnd() != null) {
+            Instant rangeEnd = params.getRangeEnd().atZone(UTC).toInstant();
+            conditions.add(event.eventDate.before(rangeEnd));
+        }
+
+        BooleanExpression finalCondition = conditions.stream()
+                .reduce(BooleanExpression::and)
+                .orElse(Expressions.TRUE);
+
+        log.debug("{}", finalCondition);
+
+        int page = params.getFrom() / params.getSize();
+        Pageable pageable = PageRequest.of(page, params.getSize());
+
+        Page<Event> events = eventRepository.findAll(finalCondition, pageable);
+
+        return events.map(eventEl -> {
+            UserShortDto user = userClient.findUserById(eventEl.getInitiator());
+            CategoryDto category = categoryClient.getCategory(eventEl.getCategory());
+
+            return eventMapper.toFullDto(eventEl, category, user);
+        }).getContent();
+    }
+
+
+    // Public API:
+    @Override
+    public EventFullDto findPublicBy(Long eventId, HttpServletRequest request) {
+        log.debug("Метод findPublicBy() (return DTO); eventId={}", eventId);
+
+        Event event = eventRepository.findByIdAndState(eventId, EventState.PUBLISHED)
+                .orElseThrow(() -> new NotFoundException("Опубликованного Event id={} нет", eventId));
+
+        statsClient.hit(request);
+        this.setViewsForEvent(event);
+
+        UserShortDto user = userClient.findUserById(event.getInitiator());
+        CategoryDto category = categoryClient.getCategory(event.getCategory());
+
+        return eventMapper.toFullDto(event, category, user);
+    }
+
+    @Override
+    public List<EventFullDto> findPublicBy(UserEventSearchParams params, HttpServletRequest request) {
+        log.debug("Метод findPublicBy() (return List<DTO>); {}", params);
+
+        QEvent event = QEvent.event;
+        List<BooleanExpression> conditions = new ArrayList<>();
+
+        conditions.add(event.state.eq(EventState.PUBLISHED));
+
+        if (params.getText() != null && !params.getText().isEmpty()) {
+            conditions.add(
+                    event.annotation.containsIgnoreCase(params.getText())
+                            .or(event.description.containsIgnoreCase(params.getText())));
+        }
+
+        if (params.getCategories() != null && !params.getCategories().isEmpty()) {
+            conditions.add(event.category.in(params.getCategories()));
+        }
+
+        if (params.getPaid() != null) {
+            conditions.add(event.paid.eq(params.getPaid()));
+        }
+
+        if (params.getRangeStart() != null) {
+            Instant rangeStart = params.getRangeStart().atZone(UTC).toInstant();
+            conditions.add(event.eventDate.after(rangeStart));
+        }
+
+        if (params.getRangeEnd() != null) {
+            Instant rangeEnd = params.getRangeEnd().atZone(UTC).toInstant();
+            conditions.add(event.eventDate.before(rangeEnd));
+        }
+
+        if (params.getRangeStart() == null && params.getRangeEnd() == null) {
+            conditions.add(event.eventDate.after(Instant.now()));
+        }
+
+        if (params.getOnlyAvailable() != null) {
+            conditions.add(event.confirmedRequests.lt(event.participantLimit.longValue()));
+        }
+
+        BooleanExpression finalCondition = conditions.stream()
+                .reduce(BooleanExpression::and)
+                .orElse(Expressions.TRUE);
+
+        log.debug("{}", finalCondition);
+
+        int page = params.getFrom() / params.getSize();
+
+        Pageable pageable = null;
+
+        switch (params.getSort()) {
+            case EVENT_DATE -> pageable =
+                    PageRequest.of(page, params.getSize(), Sort.by(Sort.Direction.ASC, "eventDate"));
+            case VIEWS -> pageable =
+                    PageRequest.of(page, params.getSize(), Sort.by(Sort.Direction.DESC, "views"));
+        }
+
+        Page<Event> events = eventRepository.findAll(finalCondition, pageable);
+
+        statsClient.hit(request);
+
+        return events.map(eventEl -> {
+            UserShortDto user = userClient.findUserById(eventEl.getInitiator());
+            CategoryDto category = categoryClient.getCategory(eventEl.getCategory());
+
+            return eventMapper.toFullDto(eventEl, category, user);
+        }).getContent();
+    }
+
+    private Event findEventBy(Long eventId) {
+        log.debug("Поиск Event id={} в репозитории", eventId);
+
+        return eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Объект Event id={} не найден", eventId));
+    }
+
+    private void checkStartDate(LocalDateTime eventDate) {
+        log.debug("Проверка даты при СОЗДАНИИ");
+
+        if (eventDate != null && eventDate.isBefore(LocalDateTime.now().plusHours(2))) {
+            throw new ConflictException("Дата Event при СОЗДАНИИ должна быть в будущем, мин. через 2 часа");
+        }
+    }
+
+    private void checkEventDateForUpdate(UpdEventUserRequest updDto) {
+        log.debug("Проверка даты Event при ОБНОВЛЕНИИ");
+
+        if (updDto.getEventDate() != null) {
+            this.checkStartDate(updDto.getEventDate());
+        }
+    }
+
+    private void checkEventDateForPublish(LocalDateTime eventDate) {
+        log.debug("Проверка даты Event при ПУБЛИКАЦИИ");
+
+        if (eventDate != null && eventDate.isBefore(LocalDateTime.now().plusHours(1))) {
+            throw new ConflictException("Дата Event при ПУБЛИКАЦИИ должна быть в будущем, мин. через 1 час");
+        }
+    }
+
+    private void setViewsForEvent(Event event) {
+        List<StatsDto> stats = statsClient.getStats(ReqStatsParams.builder()
+                .start(LocalDateTime.now().minusYears(100))
+                .end(LocalDateTime.now().plusYears(1))
+                .uris(List.of("/events/" + event.getId()))
+                .unique(true)
+                .build());
+
+        event.setViews(stats.getFirst().getHits());
+    }
+}

@@ -1,0 +1,16 @@
+server:
+  port: 0
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:8888/user
+    username: user
+    password: user
+  jpa:
+    properties:
+      hibernate:
+        default_schema: public
+        format_sql: false
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
