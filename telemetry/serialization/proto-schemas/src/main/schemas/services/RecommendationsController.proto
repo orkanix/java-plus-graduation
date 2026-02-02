@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package stats.service.dashboard;
+
+option java_multiple_files = true;
+option java_package = "grpc.telemetry.analyzer";
+
+import "messages/UserPredictionsRequestProto.proto";
+
+service RecommendationsController {
+  rpc GetRecommendationsForUser(telemetry.message.analyzer.UserPredictionsRequestProto)
+      returns (telemetry.message.analyzer.RecommendedEventProto);
+
+  rpc GetSimilarEvents(telemetry.message.analyzer.SimilarEventsRequestProto)
+      returns (telemetry.message.analyzer.RecommendedEventProto);
+
+  rpc GetInteractionsCount(telemetry.message.analyzer.InteractionsCountRequestProto)
+      returns (telemetry.message.analyzer.RecommendedEventProto);
+}
