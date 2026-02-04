@@ -26,7 +26,7 @@ public class UserActionController extends UserActionControllerGrpc.UserActionCon
     @Override
     public void collectUserAction(UserActionProto request, StreamObserver<Empty> responseObserver) {
         try {
-            log.info("Пришло новое действие пользователя с id: {}!", request.getUserId());
+            log.info("Пришло новое действие {} пользователя с id: {}!", request.getActionType(), request.getUserId());
             service.sendUserAction(toAvro(request));
             responseObserver.onNext(Empty.getDefaultInstance());
             responseObserver.onCompleted();

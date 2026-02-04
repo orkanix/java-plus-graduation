@@ -78,7 +78,7 @@ public class EventMapper {
         dto.setEventDate(toLocalDateTimeForMap(event.getEventDate()));
         dto.setPaid(event.getPaid());
         dto.setConfirmedRequests(event.getConfirmedRequests());
-        dto.setViews(event.getViews());
+        dto.setRating(event.getRating());
         dto.setInitiator(userShortDto);
 
         return dto;
@@ -101,7 +101,7 @@ public class EventMapper {
         dto.setRequestModeration(event.getRequestModeration());
         dto.setConfirmedRequests(event.getConfirmedRequests());
         dto.setState(event.getState());
-        dto.setViews(event.getViews());
+        dto.setRating(event.getRating());
         dto.setInitiator(userShortDto);
 
         if (event.getLocation() != null) {

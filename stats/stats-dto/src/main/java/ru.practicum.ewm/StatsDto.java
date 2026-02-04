@@ -15,5 +15,5 @@ public class StatsDto {
 
     private String uri;
 
-    private long hits;
+    private double rating;
 }

@@ -24,7 +24,7 @@ public interface EventService {
     List<EventFullDto> searchForAdmin(AdminEventSearchParams params);
 
     // Public API:
-    EventFullDto findPublicBy(Long eventId, HttpServletRequest request);
+    EventFullDto findPublicBy(Long userId, Long eventId, HttpServletRequest request);
 
     List<EventFullDto> findPublicBy(UserEventSearchParams params, HttpServletRequest request);
 
@@ -43,4 +43,8 @@ public interface EventService {
     EventFullDto findByIdFull(Long eventId);
 
     EventFullDto setConfirmedRequests(EventFullDto event);
+
+    List<EventShortDto> findRecommendations(Long userId);
+
+    void likeEvent(Long userId, Long eventId);
 }
