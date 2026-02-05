@@ -10,6 +10,8 @@ import ru.practicum.ewm.stats.avro.EventSimilarityAvro;
 import ru.practicum.ewm.stats.avro.UserActionAvro;
 import telemetry.service.aggregator.producer.SimilarityProducer;
 
+import java.util.List;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -28,15 +30,17 @@ public class AggregationStarter {
                     event.getEventId(),
                     event.getActionType());
 
-            EventSimilarityAvro similarity = similarityCalculator.process(event);
+            List<EventSimilarityAvro> similarity = similarityCalculator.process(event);
 
-            if (similarity != null) {
+            if (similarity != null && !similarity.isEmpty()) {
                 similarityProducer.sendSimilarity(similarity);
 
-                log.info("Сходство успешно отправлено: eventA={}, eventB={}, score={}",
-                        similarity.getEventA(),
-                        similarity.getEventB(),
-                        similarity.getScore());
+                for (EventSimilarityAvro sim : similarity) {
+                    log.info("Сходство успешно отправлено: eventA={}, eventB={}, score={}",
+                            sim.getEventA(),
+                            sim.getEventB(),
+                            sim.getScore());
+                }
             }
         } catch (Exception e) {
             log.error("Ошибка при обработке действия пользователя: userId={}, eventId={}, action={}",

@@ -10,3 +10,5 @@ public class Collector {
         SpringApplication.run(Collector.class, args);
     }
 }
+
+//java -jar tester-0.0.1.jar --tester.execution.mode=AGGREGATION --tester.execution.output.file-path=./report.txt
