@@ -19,17 +19,12 @@ public class SimilarityProducer {
     @Value("${spring.topics.events-similarity-topic-name}")
     private String similarityTopic;
 
-    public void sendSimilarity(EventSimilarityAvro similarEventsRequest) {
-        similarityKafkaTemplate.send(similarityTopic, similarEventsRequest);
-        log.info("Отправлен снапшот similarity={}", similarEventsRequest.getSchema());
-    }
-
     public void sendSimilarity(List<EventSimilarityAvro> similarEvents) {
         for (EventSimilarityAvro ev : similarEvents) {
             similarityKafkaTemplate.send(similarityTopic, ev);
             log.info("Отправлен similarity={}", ev);
         }
-        similarityKafkaTemplate.flush(); // чтобы сразу отправить все
+        similarityKafkaTemplate.flush();
     }
 
     public void flush() {

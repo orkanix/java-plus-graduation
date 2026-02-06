@@ -178,9 +178,9 @@ public class AnalyzerServiceImpl implements AnalyzerService {
 
         return similarEvents.stream()
                 .filter(eventSimilarity -> {
-                    boolean A = events.contains(eventSimilarity.getEventA());
-                    boolean B = events.contains(eventSimilarity.getEventB());
-                    return !(A && B);
+                    boolean a = events.contains(eventSimilarity.getEventA());
+                    boolean b = events.contains(eventSimilarity.getEventB());
+                    return !(a && b);
                 })
                 .sorted(Comparator.comparing(EventSimilarity::getScore).reversed())
                 .limit(request.getMaxResults())

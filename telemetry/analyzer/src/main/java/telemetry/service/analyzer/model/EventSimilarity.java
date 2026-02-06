@@ -30,10 +30,4 @@ public class EventSimilarity {
 
     @Column(nullable = false)
     private LocalDateTime timestamp;
-
-    public Long getOther(Long eventId) {
-        if (eventA.equals(eventId)) return eventB;
-        else if (eventB.equals(eventId)) return eventA;
-        else throw new IllegalArgumentException("Event not part of similarity");
-    }
 }

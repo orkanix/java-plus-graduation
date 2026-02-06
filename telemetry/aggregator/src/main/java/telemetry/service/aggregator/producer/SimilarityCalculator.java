@@ -31,7 +31,7 @@ public class SimilarityCalculator {
         Double oldWeight = userWeights.get(userId);
 
         if (oldWeight != null && oldWeight >= weight) {
-            return results; // ничего не меняется
+            return results;
         }
 
         userWeights.put(userId, weight);

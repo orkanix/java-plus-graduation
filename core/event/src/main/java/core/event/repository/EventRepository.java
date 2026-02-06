@@ -1,6 +1,5 @@
 package core.event.repository;
 
-import core.common.event.dto.EventShortDto;
 import core.common.event.dto.EventState;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
