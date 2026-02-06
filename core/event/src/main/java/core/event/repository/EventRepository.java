@@ -1,5 +1,6 @@
 package core.event.repository;
 
+import core.common.event.dto.EventShortDto;
 import core.common.event.dto.EventState;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -8,7 +9,7 @@ import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.stereotype.Repository;
 import core.event.model.Event;
 
-import java.util.Optional;
+import java.util.*;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPredicateExecutor<Event> {
@@ -22,4 +23,6 @@ public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPre
     boolean existsByCategory(Long categoryId);
 
     boolean existsByIdAndInitiator(Long eventId, Long userId);
+
+    List<Event> findAllByIdIn(Collection<Long> ids);
 }

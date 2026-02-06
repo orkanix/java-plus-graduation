@@ -6,9 +6,7 @@ import grpc.telemetry.user_request.SimilarEventsRequestProto;
 import grpc.telemetry.user_request.UserPredictionsRequestProto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import telemetry.service.analyzer.model.EventSimilarity;
 import telemetry.service.analyzer.model.UserInteraction;
 import telemetry.service.analyzer.repository.EventSimilarityRepository;
@@ -28,7 +26,7 @@ public class AnalyzerServiceImpl implements AnalyzerService {
 
     @Override
     public Stream<RecommendedEventProto> getRecommendationsForUser(UserPredictionsRequestProto request) {
-        List<UserInteraction> interactionsForUser = userInteractionRepository.findAllByUserId((long) request.getUserId());
+        List<UserInteraction> interactionsForUser = userInteractionRepository.findAllByUserId(request.getUserId());
 
         if (interactionsForUser.isEmpty()) {
             return Stream.empty();
@@ -103,7 +101,7 @@ public class AnalyzerServiceImpl implements AnalyzerService {
                 .collect(Collectors.toSet());
 
         Map<Long, Double> neighborRatingMap = userInteractionRepository
-                .findAllByUserIdAndEventIdIn((long) request.getUserId(), new ArrayList<>(neighborEventIds))
+                .findAllByUserIdAndEventIdIn(request.getUserId(), new ArrayList<>(neighborEventIds))
                 .stream()
                 .collect(Collectors.toMap(UserInteraction::getEventId, UserInteraction::getRating));
 
@@ -169,9 +167,9 @@ public class AnalyzerServiceImpl implements AnalyzerService {
     public Stream<RecommendedEventProto> getSimilarEvents(SimilarEventsRequestProto request) {
 
         List<EventSimilarity> similarEvents =
-                eventSimilarityRepository.findAllByEventId((long) request.getEventId());
+                eventSimilarityRepository.findAllByEventId(request.getEventId());
         List<UserInteraction> userInteractions =
-                userInteractionRepository.findAllByUserId((long) request.getUserId());
+                userInteractionRepository.findAllByUserId(request.getUserId());
 
         Set<Long> events =
                 userInteractions.stream()

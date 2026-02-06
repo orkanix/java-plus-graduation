@@ -1,6 +1,5 @@
 package telemetry.service.analyzer.consumer;
 
-import com.netflix.appinfo.InstanceInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -54,8 +53,8 @@ public class AnalyzerStarter {
                 }
             } else {
                 UserInteraction userInteraction = UserInteraction.builder()
-                        .userId((long) userActionAvro.getUserId())
-                        .eventId((long) userActionAvro.getEventId())
+                        .userId(userActionAvro.getUserId())
+                        .eventId(userActionAvro.getEventId())
                         .rating(score)
                         .timestamp(LocalDateTime.now())
                         .build();
@@ -75,7 +74,7 @@ public class AnalyzerStarter {
         try {
             log.info("Analyzer: Получено event-similarity: {}", eventSimilarityAvro);
             Optional<EventSimilarity> existingSimilarity =
-                    eventSimilarityRepository.findByEventAAndEventB((long) eventSimilarityAvro.getEventA(), (long) eventSimilarityAvro.getEventB());
+                    eventSimilarityRepository.findByEventAAndEventB(eventSimilarityAvro.getEventA(), eventSimilarityAvro.getEventB());
 
             if (existingSimilarity.isPresent()) {
 
@@ -88,8 +87,8 @@ public class AnalyzerStarter {
             } else {
 
                 EventSimilarity similarity = EventSimilarity.builder()
-                        .eventA((long) eventSimilarityAvro.getEventA())
-                        .eventB((long) eventSimilarityAvro.getEventB())
+                        .eventA(eventSimilarityAvro.getEventA())
+                        .eventB(eventSimilarityAvro.getEventB())
                         .score(eventSimilarityAvro.getScore())
                         .timestamp(LocalDateTime.now())
                         .build();

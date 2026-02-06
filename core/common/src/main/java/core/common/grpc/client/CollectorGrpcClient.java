@@ -5,9 +5,11 @@ import com.google.protobuf.Empty;
 import grpc.telemetry.collector.UserActionControllerGrpc;
 import grpc.telemetry.user_action.ActionTypeProto;
 import grpc.telemetry.user_action.UserActionProto;
+import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class CollectorGrpcClient {
 
@@ -16,8 +18,8 @@ public class CollectorGrpcClient {
 
     public void sendEvent(long userId, long eventId, ActionTypeProto actionType) {
         UserActionProto request = UserActionProto.newBuilder()
-                .setUserId((int) userId)
-                .setEventId((int) eventId)
+                .setUserId(userId)
+                .setEventId(eventId)
                 .setActionType(actionType)
                 .build();
 

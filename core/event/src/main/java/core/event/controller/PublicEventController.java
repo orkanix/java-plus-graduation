@@ -58,8 +58,9 @@ public class PublicEventController {
     }
 
     @GetMapping("/recommendations")
-    public List<EventShortDto> findRecommendations(@RequestHeader("X-EWM-USER-ID") @Positive Long userId) {
-        return eventService.findRecommendations(userId);
+    public List<EventShortDto> findRecommendations(@RequestHeader("X-EWM-USER-ID") @Positive Long userId,
+                                                   @RequestParam(defaultValue = "10") @Positive Integer size) {
+        return eventService.findRecommendations(userId, size);
     }
 
     @PutMapping("/setConfirmedRequests")

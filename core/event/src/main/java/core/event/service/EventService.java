@@ -44,7 +44,7 @@ public interface EventService {
 
     EventFullDto setConfirmedRequests(EventFullDto event);
 
-    List<EventShortDto> findRecommendations(Long userId);
+    List<EventShortDto> findRecommendations(Long userId, Integer size);
 
     void likeEvent(Long userId, Long eventId);
 }
