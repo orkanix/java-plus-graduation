@@ -11,4 +11,4 @@ public class Collector {
     }
 }
 
-//java -jar tester-0.0.1.jar --tester.execution.mode=AGGREGATION --tester.execution.output.file-path=./report.txt
+//java -jar tester-0.0.1.jar --tester.execution.mode=ANALYZE --tester.execution.output.file-path=./report.txt

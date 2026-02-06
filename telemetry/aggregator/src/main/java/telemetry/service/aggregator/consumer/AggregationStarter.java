@@ -2,9 +2,7 @@ package telemetry.service.aggregator.consumer;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 import ru.practicum.ewm.stats.avro.EventSimilarityAvro;
 import ru.practicum.ewm.stats.avro.UserActionAvro;
@@ -23,7 +21,6 @@ public class AggregationStarter {
     @KafkaListener(topics = "${spring.topics.user-action-topic-name}",
             groupId = "aggregator-group")
     public synchronized void start(UserActionAvro event) {
-
         try {
             log.info("Получено действие пользователя: userId={}, eventId={}, action={}",
                     event.getUserId(),

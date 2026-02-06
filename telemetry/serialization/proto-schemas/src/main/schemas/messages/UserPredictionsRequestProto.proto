@@ -19,8 +19,7 @@ message SimilarEventsRequestProto {
 }
 
 message InteractionsCountRequestProto {
-  int32 event_id = 1;
-  double score = 2;
+  repeated int32 eventId = 1;
 }
 
 message RecommendedEventProto {

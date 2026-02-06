@@ -27,9 +27,9 @@ public class UserActionConsumerConfig {
     public ConsumerFactory<String, UserActionAvro> userActionConsumerFactory() throws ClassNotFoundException {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "aggregator-group");
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, Class.forName(keyDeserializer));
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, Class.forName(valueDeserializer));
-
         return new DefaultKafkaConsumerFactory<>(props);
     }
 }

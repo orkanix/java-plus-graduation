@@ -51,6 +51,14 @@ public class UserActionController extends UserActionControllerGrpc.UserActionCon
                 .build();
     }
 
+    private static ActionTypeProto parseProtoActionType(String actionType) {
+        try {
+            return ActionTypeProto.valueOf(actionType);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Некорректный тип действия: " + actionType);
+        }
+    }
+
     private static ActionTypeAvro toAvroActionType(ActionTypeProto proto) {
         switch (proto) {
             case ACTION_VIEW: return ActionTypeAvro.VIEW;

@@ -69,6 +69,16 @@ services:
       - POSTGRES_USER=compilation
       - POSTGRES_PASSWORD=compilation
 
+  analyze-db:
+    image: postgres:16.1
+    container_name: analyze-db
+    ports:
+      - "1111:5432"
+    environment:
+      - POSTGRES_DB=analyze
+      - POSTGRES_USER=analyze
+      - POSTGRES_PASSWORD=analyze
+
   kafka:
     image: confluentinc/confluent-local:7.4.3
     hostname: kafka
