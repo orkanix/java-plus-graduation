@@ -13,9 +13,9 @@
     <name>Explore With Me</name>
 
     <modules>
-        <module>stats</module>
         <module>infra</module>
         <module>core</module>
+        <module>telemetry</module>
     </modules>
 
     <groupId>ru.practicum</groupId>
@@ -39,6 +39,14 @@
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
                 <version>2023.0.3</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-bom</artifactId>
+                <version>1.58.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

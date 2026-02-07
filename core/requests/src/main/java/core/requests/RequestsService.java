@@ -6,7 +6,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication(scanBasePackages = {
         "core.requests",
-        "core.common.exception"
+        "core.common"
 })
 @EnableFeignClients(basePackages = "core.common")
 public class RequestsService {

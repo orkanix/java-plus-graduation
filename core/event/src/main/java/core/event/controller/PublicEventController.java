@@ -24,9 +24,10 @@ public class PublicEventController {
 
     @GetMapping("/{eventId}")
     public EventFullDto publicSearchOne(@PathVariable @Positive Long eventId,
+                                        @RequestHeader("X-EWM-USER-ID") @Positive Long userId,
                                         HttpServletRequest request) {
-        log.debug("Метод publicSearchOne(); eventId={}", eventId);
-        return eventService.findPublicBy(eventId, request);
+        log.debug("Метод publicSearchOne(); userId={}, eventId={}", userId, eventId);
+        return eventService.findPublicBy(userId, eventId, request);
     }
 
     @GetMapping
@@ -56,8 +57,20 @@ public class PublicEventController {
         return eventService.findByIdFull(eventId);
     }
 
+    @GetMapping("/recommendations")
+    public List<EventShortDto> findRecommendations(@RequestHeader("X-EWM-USER-ID") @Positive Long userId,
+                                                   @RequestParam(defaultValue = "10") @Positive Integer size) {
+        return eventService.findRecommendations(userId, size);
+    }
+
     @PutMapping("/setConfirmedRequests")
     public EventFullDto setConfirmedRequests(@RequestBody @Valid EventFullDto event) {
         return eventService.setConfirmedRequests(event);
+    }
+
+    @PutMapping("{eventId}/like")
+    public void likeEvent(@RequestHeader("X-EWM-USER-ID") @Positive Long userId,
+                          @PathVariable @Positive Long eventId) {
+        eventService.likeEvent(userId, eventId);
     }
 }

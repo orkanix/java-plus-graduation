@@ -1,8 +1,20 @@
 server:
   port: 0
 
-statsServer:
-  id: stats-server
+grpc:
+  server:
+    enabled: false
+  client:
+    collector:
+      address: 'discovery:///collector'
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      negotiationType: plaintext
+    analyzer:
+      address: 'discovery:///analyzer'
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      negotiationType: plaintext
 
 spring:
   datasource:

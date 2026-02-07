@@ -3,10 +3,12 @@ package core.requests.service;
 import core.common.event.client.EventClient;
 import core.common.event.dto.EventFullDto;
 import core.common.event.dto.EventState;
+import core.common.grpc.client.CollectorGrpcClient;
 import core.common.requests.dto.ParticipationRequestDto;
 import core.common.requests.dto.RequestStatus;
 import core.common.user.client.UserClient;
 import core.common.user.dto.UserShortDto;
+import grpc.telemetry.user_action.ActionTypeProto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,8 @@ public class RequestServiceImpl implements RequestService {
     private final RequestRepository requestRepository;
 
     private final RequestMapper requestMapper;
+
+    private final CollectorGrpcClient grpcClient;
 
     @Override
     @Transactional
@@ -73,6 +77,8 @@ public class RequestServiceImpl implements RequestService {
                 .status(status)
                 .build();
         request = requestRepository.save(request);
+
+        grpcClient.sendEvent(userId, eventId, ActionTypeProto.ACTION_REGISTER);
 
         return requestMapper.toDto(request);
     }
